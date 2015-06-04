@@ -178,11 +178,15 @@ classdef LabProtocol < SymphonyProtocol
         function completeRun(obj)
             completeRun@SymphonyProtocol(obj)
             s = sprintf('\n');
+            % Log LED channel information
             if obj.loggingIsValid
-                if isprop(obj, 'postRunPropertiesToLog')
-                    s = obj.logProperties('postRunPropertiesToLog', s);
-                    obj.sendToLog(s);
+                fieldNames = fieldnames(obj.deviceBackgrounds);
+                channelNames = fieldNames(strncmp('Ch',fieldNames,2));
+                for d = 1:numel(channelNames)
+                   formatSpec = '%sLED %s : %s%s';
+                   s = sprintf(formatSpec, s, channelNames{d}, obj.deviceBackgrounds.(channelNames{d}), obj.logTab);
                 end
+                obj.sendToLog(s);
                 obj.sendToLog(sprintf('\n'));
                 obj.notepad.saveFcn();
             end
