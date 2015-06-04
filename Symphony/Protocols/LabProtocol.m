@@ -176,9 +176,13 @@ classdef LabProtocol < SymphonyProtocol
         end
         
         function completeRun(obj)
-            completeRun@SymphonyProtocol(obj);
-            obj.sendToLog(sprintf('\n'));
+            completeRun@SymphonyProtocol(obj)
             if obj.loggingIsValid
+                if isprop(obj, 'postRunPropertiesToLog')
+                    s = obj.logProperties('postRunPropertiesToLog', s);
+                    obj.sendToLog(s);
+                end
+                obj.sendToLog(sprintf('\n'));
                 obj.notepad.saveFcn();
             end
         end
