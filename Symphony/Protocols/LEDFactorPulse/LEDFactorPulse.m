@@ -62,8 +62,8 @@ classdef LEDFactorPulse < LabProtocol
         
         function p = parameterProperty(obj, parameterName)
             % Call the base method to create the property object.
-            p = parameterProperty@SymphonyProtocol(obj, parameterName);
-            
+            %p = parameterProperty@SymphonyProtocol(obj, parameterName);
+            p = parameterProperty@LabProtocol(obj, parameterName);
             % Return properties for the specified parameter (see ParameterProperty class).
             switch parameterName
                 case 'amp'
@@ -102,7 +102,8 @@ classdef LEDFactorPulse < LabProtocol
         function prepareEpoch(obj, epoch)
             % Call the base method.
             prepareEpoch@SymphonyProtocol(obj, epoch);
-            
+            amplifierMode = obj.rigConfig.multiClampMode(obj.amp);
+            epoch.addParameter('amplifierMode', amplifierMode);
             % Add the amp pulse stimulus to the epoch.
             epoch.addStimulus(obj.StimulusLED, obj.ledStimulus(obj.StimulusLED));
         end
