@@ -87,7 +87,7 @@ classdef GraphingAmplifierResponse < Module
             clf(obj.figureHandle);
             
             %Deimensions
-            figureWidth = 1050;
+            figureWidth = 850; %DT Earlier it was 1050
             figureHeight = 400;
             
             checkBoxWidth = 110;
@@ -97,7 +97,7 @@ classdef GraphingAmplifierResponse < Module
             position(3) = figureWidth;
             position(4) = figureHeight;
             set(obj.figureHandle, 'Position', position);
-            set(obj.figureHandle, 'Resize', 'Off');
+            %set(obj.figureHandle, 'Resize', 'Off');
             set(obj.figureHandle, 'Color', obj.BackgroundColor);
             set(obj.figureHandle, 'WindowKeyPressFcn', @(hObject, eventdata)setAxisCallback(obj,hObject,eventdata));
             
@@ -595,7 +595,7 @@ classdef GraphingAmplifierResponse < Module
                 responseObject = obj.availableResponses.( paramTag );
                 responseObject.clearFigure();
             end
-            
+            set(get(obj.graph,'title'),'string',''); %DT
             obj.checkingForGrid;
             obj.addSavedGraphs;
         end
@@ -680,16 +680,27 @@ classdef GraphingAmplifierResponse < Module
                         
                         if ~isempty(XData) || ~isempty(YData)
                             hold(obj.graph, obj.getHoldState);
-                            if obj.graphsAdded > 1
+                            if obj.graphsAdded >= 1
                                 plot(obj.graph,XData,YData,'Color',responseObject.lineColor,'DisplayName',paramTag);
-                            else
-                                plot(obj.graph,XData,YData,'DisplayName',paramTag);
+%                             else
+%                                 plot(obj.graph,XData,YData,'DisplayName',paramTag);
                             end
                             set(obj.graph,'Color',obj.axesBackgroundColor);
                             set(obj.graph, 'XColor', obj.gridColor);
                             set(obj.graph, 'YColor', obj.gridColor);
                             axis(obj.graph,'tight') ;
                             obj.setAxis;
+      		  	    %Start changes by DT		
+                            if isfield(epoch.parameters, 'StimAmp')%show stimulus parameters as title
+                                nepohc_all = epoch.parameters.numberOfIntensities*epoch.parameters.numberOfRepeats;
+                                stim_para = sprintf('%gmV-%dInts-%dReps',epoch.parameters.initialPulseAmplitude,...
+                                    epoch.parameters.numberOfIntensities, epoch.parameters.numberOfRepeats);
+                                str_title = sprintf('Epoch%d/%d: %g mV Temp:%4.1fC, %s',epoch.parameters.numberOfEpochsCompleted,nepohc_all, ...
+                                    epoch.parameters.StimAmp,epoch.parameters.Temp, stim_para);
+                                set(get(obj.graph, 'title'),'string',str_title,...
+                                'Color',[1 1 1],'FontSize',16);
+                            end
+			    % End changes by DT
                             drawnow;
                         end
                         hold(obj.graph, 'off');

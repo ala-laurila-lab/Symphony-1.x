@@ -28,7 +28,7 @@ classdef LEDFactorPulse < LabProtocol
         numberOfIntensities = 5
         numberOfRepeats = 1
         interpulseInterval = 0
-        ampHoldSignal = -60
+        ampHoldSignal = -50
         %lightRange = {'pico','nano','micro','raw'}
     end
     
@@ -46,7 +46,6 @@ classdef LEDFactorPulse < LabProtocol
             'tailTime' ...
             'ampHoldSignal' ...
             };
-        
         LEDBackground = 0;
         storedPulseAmplitudeAndBackground = {};
         epochCount = 0;
@@ -105,6 +104,8 @@ classdef LEDFactorPulse < LabProtocol
             
             % Add the amp pulse stimulus to the epoch.
             epoch.addStimulus(obj.StimulusLED, obj.ledStimulus(obj.StimulusLED));
+            epoch.addParameter('pulseAmplitude', obj.pulseAmplitude + obj.LEDBackground);%DT
+            epoch.addParameter('backgroundAmplitude', obj.LEDBackground);%DT
         end
         
         function queueEpoch(obj, epoch)
