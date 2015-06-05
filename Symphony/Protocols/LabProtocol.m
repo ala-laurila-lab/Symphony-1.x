@@ -18,9 +18,25 @@ classdef LabProtocol < SymphonyProtocol
         timeString = 'HH:MM:SS-dd/mm/yy';
         logTab = '      ';
     end
-    
+    properties
+        ampMode
+    end
     methods
         %% Overridden Functions
+        function p = parameterProperty(obj, parameterName)
+            % Call the base method to create the property object.
+            p = parameterProperty@SymphonyProtocol(obj, parameterName);
+            
+            % Return properties for the specified parameter (see ParameterProperty class).
+            switch parameterName
+                case 'ampMode'
+                    p.defaultValue ={'Cell attached','Whole cell'};
+            end
+
+            if ~p.units
+                p.units = '';
+            end
+        end
         function obj = init(obj, rigConfig)
             init@SymphonyProtocol(obj, rigConfig);
             obj.openModules();
@@ -99,11 +115,12 @@ classdef LabProtocol < SymphonyProtocol
         
         function prepareEpoch(obj, epoch)
             prepareEpoch@SymphonyProtocol(obj, epoch);
+            
         end
         
         function completeEpoch(obj, epoch)
             completeEpoch@SymphonyProtocol(obj, epoch);
-            
+            %epoch.addParameter('numberOfEpochsCompleted', obj.numEpochsCompleted);%DT
             if ~isempty(obj.SolutionController)
                 epoch.addParameter('SolutionController', obj.SolutionControllerStatusString);
             end
