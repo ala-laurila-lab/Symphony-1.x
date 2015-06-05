@@ -121,6 +121,7 @@ classdef LabProtocol < SymphonyProtocol
         function completeEpoch(obj, epoch)
             completeEpoch@SymphonyProtocol(obj, epoch);
             %epoch.addParameter('numberOfEpochsCompleted', obj.numEpochsCompleted);%DT
+            
             if ~isempty(obj.SolutionController)
                 epoch.addParameter('SolutionController', obj.SolutionControllerStatusString);
             end
@@ -137,7 +138,12 @@ classdef LabProtocol < SymphonyProtocol
                    obj.epochsInSet = 0; 
                 end
             end
-                        
+
+            if obj.rigConfig.isDevice('HeatController')%DT
+                temp = obj.recordSolutionTemp(epoch);
+                epoch.addParameter('Temp', temp);
+            end
+
             if obj.loggingIsValid
                 formatSpec = '%u%s%u:%u:%u';
                 s = sprintf(formatSpec, ...
@@ -161,9 +167,9 @@ classdef LabProtocol < SymphonyProtocol
 
                 if obj.rigConfig.isDevice('HeatController')
                     formatSpec = '%s%sTemp:%gC';
-                    temp = obj.recordSolutionTemp(epoch);
+                    %temp = obj.recordSolutionTemp(epoch);
                     s = sprintf(formatSpec, s, obj.logTab, temp);
-                    epoch.addParameter('Temp', temp + 'C');
+                    %epoch.addParameter('Temp', temp + 'C');
                 end
                                 
                 if isprop(obj, 'postEpochLogging')
