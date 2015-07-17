@@ -8,10 +8,10 @@ classdef Multiclamp < LabRigConfiguration
     methods   
         %% Note: The names of the devices are important, the can not be changed!
         function createDevices(obj)
-             obj.addMultiClampDevice('1_Amplifier_Ch1', 1, 'ANALOG_OUT.0', 'ANALOG_IN.0');
-             obj.addMultiClampDevice('1_Amplifier_Ch2', 2, 'ANALOG_OUT.1', 'ANALOG_IN.1'); 
-             obj.addMultiClampDevice('2_Amplifier_Ch1', 1, 'ANALOG_OUT.2', 'ANALOG_IN.2');   
-             obj.addMultiClampDevice('2_Amplifier_Ch1', 2, 'ANALOG_OUT.3', 'ANALOG_IN.3'); 
+             obj.addMultiClampDevice('Amplifier_01_Ch1', 1, 1, 'ANALOG_OUT.0', 'ANALOG_IN.0');
+             obj.addMultiClampDevice('Amplifier_01_Ch2', 1, 2, 'ANALOG_OUT.1', 'ANALOG_IN.1'); 
+             obj.addMultiClampDevice('Amplifier_02_Ch1', 2, 1, 'ANALOG_OUT.2', 'ANALOG_IN.2');   
+             obj.addMultiClampDevice('Amplifier_02_Ch2', 2, 2, 'ANALOG_OUT.3', 'ANALOG_IN.3'); 
             %% LED Devices
             obj.addDevice('Ch1', 'ANALOG_OUT.4', '');
             obj.addDevice('Ch2', 'ANALOG_OUT.5', '');
