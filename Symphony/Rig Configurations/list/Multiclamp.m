@@ -23,17 +23,16 @@ classdef Multiclamp < LabRigConfiguration
 %             obj.addDevice('Optometer', '', 'ANALOG_IN.3'); %Uncomment if you are using the optometer, make sure the correcct channel is being used
             
             %% Adding the Rig Switches 
-            %TODO Fix rig switches due to change in IO BUS for ITC 1600
 
-%            obj.addDevice('Rig_Switches_0','', 'DIGITAL_IN.0');  % input only
-%            obj.addDevice('Rig_Switches_1','', 'DIGITAL_IN.1');  % input only
-%            obj.addDevice('Rig_Switches_2','', 'DIGITAL_IN.2');  % input only
-%            obj.addDevice('Rig_Switches_3','', 'DIGITAL_IN.3');  % input only
-%             obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
-%             obj.addDevice('Rig_Switches_5','', 'DIGITAL_IN.5');  % input only
-%             obj.addDevice('Rig_Switches_6','', 'DIGITAL_IN.6');  % input only
-%             obj.addDevice('Rig_Switches_7','', 'DIGITAL_IN.7');  % input only
-%             obj.addDevice('Rig_Switches_8','', 'DIGITAL_IN.8');  % input only
+              obj.addDevice('Rig_Switches_0','', 'DIGITAL_IN.0');  % input only
+              obj.addDevice('Rig_Switches_1','', 'DIGITAL_IN.1');  % input only
+              obj.addDevice('Rig_Switches_2','', 'DIGITAL_IN.2');  % input only
+              obj.addDevice('Rig_Switches_3','', 'DIGITAL_IN.3');  % input only
+              obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
+              obj.addDevice('Rig_Switches_5','', 'DIGITAL_IN.5');  % input only
+              obj.addDevice('Rig_Switches_6','', 'DIGITAL_IN.6');  % input only
+              obj.addDevice('Rig_Switches_7','', 'DIGITAL_IN.7');  % input only
+%              obj.addDevice('Rig_Switches_8','', 'DIGITAL_IN.8');  % input only
 %             obj.addDevice('Rig_Switches_9','', 'DIGITAL_IN.9');  % input only
 %             obj.addDevice('Rig_Switches_10','', 'DIGITAL_IN.10');  % input only
 %             obj.addDevice('Rig_Switches_11','', 'DIGITAL_IN.11');  % input only
