@@ -68,7 +68,7 @@ classdef GraphingAmplifierResponse < Module
             obj.symphonyUI.protocol.moduleUnRegister(obj.displayName);
             close@Module(obj)
         end
-
+        
         
         function dbScalingValue = get.dbScalingValue(obj)
             switch obj.dbScalingFactor
@@ -77,7 +77,7 @@ classdef GraphingAmplifierResponse < Module
                 case 10
                     dbScalingValue = 3.1623;
                 case 20
-                    dbScalingValue = 10;                    
+                    dbScalingValue = 10;
             end
         end
         
@@ -537,7 +537,7 @@ classdef GraphingAmplifierResponse < Module
                 case '10 dB'
                     dB = 10;
                 case '20 dB'
-                    dB = 20;                    
+                    dB = 20;
             end
             
             obj.dbScalingFactor = dB;
@@ -682,27 +682,27 @@ classdef GraphingAmplifierResponse < Module
                             hold(obj.graph, obj.getHoldState);
                             if obj.graphsAdded >= 1
                                 plot(obj.graph,XData,YData,'Color',responseObject.lineColor,'DisplayName',paramTag);
-%                             else
-%                                 plot(obj.graph,XData,YData,'DisplayName',paramTag);
+                                %                             else
+                                %                                 plot(obj.graph,XData,YData,'DisplayName',paramTag);
                             end
                             set(obj.graph,'Color',obj.axesBackgroundColor);
                             set(obj.graph, 'XColor', obj.gridColor);
                             set(obj.graph, 'YColor', obj.gridColor);
                             axis(obj.graph,'tight') ;
                             obj.setAxis;
-      		  	    %Start changes by DT		
+                            %Start changes by DT
                             if isfield(epoch.parameters, 'StimAmp')%show stimulus parameters as title
                                 nepohc_all = epoch.parameters.numberOfIntensities*epoch.parameters.numberOfRepeats;
                                 stim_para = sprintf('%gmV-%dInts-%dReps',epoch.parameters.initialPulseAmplitude,...
                                     epoch.parameters.numberOfIntensities, epoch.parameters.numberOfRepeats);
-%                                 str_title = sprintf('Epoch%d/%d: %g mV Temp:%4.1fC, %s',epoch.parameters.numberOfEpochsCompleted,nepohc_all, ...
-%                                     epoch.parameters.StimAmp,epoch.parameters.Temp, stim_para);
+                                % str_title = sprintf('Epoch%d/%d: %g mV Temp:%4.1fC, %s',epoch.parameters.numberOfEpochsCompleted,nepohc_all, ...
+                                % epoch.parameters.StimAmp,epoch.parameters.Temp, stim_para);
                                 str_title = sprintf('Total epoch %d: %g mV Temp:%4.1fC, %s',nepohc_all, ...
                                     epoch.parameters.StimAmp,epoch.parameters.Temp, stim_para);
                                 set(get(obj.graph, 'title'),'string',str_title,...
-                                'Color',[1 1 1],'FontSize',16);
+                                    'Color',[1 1 1],'FontSize',16);
                             end
-			    % End changes by DT
+                            % End changes by DT
                             drawnow;
                         end
                         hold(obj.graph, 'off');
