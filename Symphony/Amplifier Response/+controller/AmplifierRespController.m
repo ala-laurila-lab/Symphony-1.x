@@ -2,10 +2,14 @@ classdef AmplifierRespController < handle
     %AMPRESPCONTROLLER Summary of this class goes here
     %   Detailed explanation goes here
     
+    properties
+        rigConfig
+    end
     
     methods
         
-        function obj = AmplifierRespController()
+        function obj = AmplifierRespController(rigConfig)
+            obj.rigConfig = rigConfig;
         end
         
         function configurePlots(obj, model)
@@ -16,6 +20,7 @@ classdef AmplifierRespController < handle
         
         function updatePlots(obj, ~, ~, channelCheckBoxes, model)
             checkBox = obj.getValues(channelCheckBoxes);
+            
             for i = 1:length(checkBox)
                 model.plotMap(checkBox(i).Tag) = checkBox(i).Value;
             end
@@ -32,6 +37,7 @@ classdef AmplifierRespController < handle
         function selectScalingChannel(obj, hObj, ~, channelRadioBtns)
             arr = obj.getValues(channelRadioBtns);
             nonSelectedChannels = arr(~ismember(arr,hObj));
+            
             for i = 1:length(nonSelectedChannels)
                 nonSelectedChannels(i).Value = 0;
             end
@@ -43,6 +49,7 @@ classdef AmplifierRespController < handle
         
         function ch = getActiveCheckBox(~, channels)
             ch = {};
+            
             for i = 1:length(channels)
                 if(channels(i).Value)
                     ch = {ch, channels(i).Tag};
@@ -54,6 +61,7 @@ classdef AmplifierRespController < handle
         function v = getValues(~, s)
             f = fieldnames(s);
             v = [];
+            
             for i = 1:length(f)
                 v = [v get(s.(f{i}))];
             end

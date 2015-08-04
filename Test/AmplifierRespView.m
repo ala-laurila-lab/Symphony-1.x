@@ -26,7 +26,7 @@ classdef AmplifierRespView  < handle
             set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
             
             obj.amplifierRespModel = model.AmplifierRespModel;
-            obj.amplifierRespController = controller.AmplifierRespController();
+            obj.amplifierRespController = controller.AmplifierRespController([]);
             obj.amplifierRespController.configurePlots(obj.amplifierRespModel);
             obj.createView();
             

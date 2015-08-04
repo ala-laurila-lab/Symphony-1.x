@@ -31,16 +31,12 @@ classdef AmplifierRespGraphView < handle
             set(obj.graph, 'Color', 'black');
         end
         
-        function plotGraph(obj)
-            data = struct('plotName',[],'x',[],'y',[]);
+        function plotGraph(obj, epoch)
             channels = obj.controller.getChannels;
-            testData = randn(1,10000);
-            plots = [];
+            
             for i = 1:length(channels)
-                data.plotName = channels{i};
-                data.y = (10 * i) + testData;
-                data.x = 1:10000;
-                if obj.model.plotMap(data.plotName)
+                if obj.model.plotMap(channels{i})
+                    [x, y] = obj.model.getData(channels{i}, epoch)
                     h = plot(obj.graph,data.x,data.y);
                     plots = [plots, h];
                     hold on;
@@ -48,7 +44,6 @@ classdef AmplifierRespGraphView < handle
                 end
             end
             drawnow
-            %cellfun(@(p) set(p,'visible','on'),plots);
             hold off;
         end
     end
