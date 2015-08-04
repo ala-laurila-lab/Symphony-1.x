@@ -29,7 +29,7 @@ classdef AmplifierRespControlView < handle
                 'Parent',controlPannel,...
                 'Padding', 5, 'Spacing', 5);
             
-            amplifierLayout  = uix.VBox(....
+            amplifierLayout  = uiextras.VBox(....
                 'Parent', controlLayout);
             
             for i = 1:length(channels)
@@ -79,7 +79,7 @@ classdef AmplifierRespControlView < handle
                     'Tag',channels{i},...
                     'Value',0);
             end
-            set(controlLayout, 'sizes', [-1 -6 -1]);
+            set(controlLayout, 'Sizes', [-1 -6 -1]);
         end
     end
 end

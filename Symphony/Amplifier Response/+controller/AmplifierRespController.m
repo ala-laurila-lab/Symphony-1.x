@@ -55,7 +55,7 @@ classdef AmplifierRespController < handle
             f = fieldnames(s);
             v = [];
             for i = 1:length(f)
-                v = [v s.(f{i})];
+                v = [v get(s.(f{i}))];
             end
         end
     end

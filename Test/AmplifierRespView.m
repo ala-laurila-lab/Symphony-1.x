@@ -38,7 +38,7 @@ classdef AmplifierRespView  < handle
             obj.infoLayout = uiextras.HBox('Parent',layout);
             obj.amplifierRespGraphView = view.AmplifierRespGraphView(obj.amplifierRespModel, obj.amplifierRespController, layout);
             obj.amplifierRespControlView = view.AmplifierRespControlView(obj.amplifierRespModel, obj.amplifierRespController, layout);
-            set(layout, 'sizes', [-0.5 -5 120]);
+            set(layout, 'Sizes', [-0.5 -5 120]);
         end
         
         function plot(obj,epoch)

@@ -49,7 +49,7 @@ classdef AmplifierRespGraphView < handle
             end
             drawnow
             %cellfun(@(p) set(p,'visible','on'),plots);
-            hold(obj.graph, 'off');
+            hold off;
         end
     end
 end
