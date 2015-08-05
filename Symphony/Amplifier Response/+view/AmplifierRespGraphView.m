@@ -6,6 +6,8 @@ classdef AmplifierRespGraphView < handle
         controller
         graph
         model
+        channels
+        subplotHandles = []
     end
     
     methods
@@ -17,29 +19,31 @@ classdef AmplifierRespGraphView < handle
                 'Title', 'Amplifier Response',...
                 'Parent', layout,...
                 'BackgroundColor', 'black');
-            obj.graph = axes(...
-                'Parent', graphPanel, ...
-                'ActivePositionProperty', 'OuterPosition');
-            resetGraph(obj)
+            obj.channels = obj.controller.getChannels;
+            n = length(obj.channels);
+            for i = 1:n
+                obj.subplotHandles(i) = subplot(n, 1, i);
+                obj.resetGraph(obj.subplotHandles(i));
+            end
         end
         
-        function resetGraph(obj)
-            grid(obj.graph, 'on');
-            axis(obj.graph,'tight');
-            set(obj.graph, 'XColor', 'White');
-            set(obj.graph, 'YColor', 'White');
-            set(obj.graph, 'Color', 'black');
+        function resetGraph(~, graph)
+            grid(graph, 'on');
+            axis(graph,'tight');
+            set(graph, 'XColor', 'White');
+            set(graph, 'YColor', 'White');
+            set(graph, 'Color', 'black');
         end
         
         function plotGraph(obj, epoch)
-            channels = obj.controller.getChannels;
             
-            for i = 1:length(channels)
-                if obj.model.plotMap(channels{i})
-                    [x, y] = obj.model.getData(channels{i}, epoch);
-                    h = plot(obj.graph, x, y);
-                    hold on;
-                    obj.resetGraph
+            for i = 1:length(obj.channels)
+                channel = obj.model.plotMap(obj.channels{i});
+                if channel.active
+                    h = subplot(obj.subplotHandles(i));
+                    [x, y] = obj.model.getData(obj.channels{i}, epoch);
+                    plot(x, y, 'Color', channel.color, 'ax', h);
+                    obj.resetGraph(h);
                 end
             end
             drawnow

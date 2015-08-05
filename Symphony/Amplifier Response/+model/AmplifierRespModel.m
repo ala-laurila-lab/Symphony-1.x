@@ -5,7 +5,6 @@ classdef AmplifierRespModel < handle
     properties
         plotMap
         autoScale = false
-        lastEpochInfo;
     end
     
     methods
@@ -17,6 +16,15 @@ classdef AmplifierRespModel < handle
         	[r, s, ~] = epoch.response(amplifier);
         	x = (1:numel(r))/s;
             y = r;
+
+        end
+
+        function valueSet = initPlotMapValues(obj, length)
+            valueSet = cell(1, length);
+            colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
+            for i = 1:length
+                valueSet{i} = struct('active', false, 'color', colorSet{i});
+            end
         end     
     end
 end

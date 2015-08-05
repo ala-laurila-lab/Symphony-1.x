@@ -13,8 +13,8 @@ classdef AmplifierRespController < handle
         end
         
         function configurePlots(obj, model)
-            plotsKey = {obj.getChannels{:}};
-            plotsValue = zeros(1,length(plotsKey));
+            plotsKey = obj.getChannels;
+            plotsValue = model.initPlotMapValues(length(plotsKey));
             model.plotMap = containers.Map(plotsKey,plotsValue);
         end
         
@@ -22,7 +22,9 @@ classdef AmplifierRespController < handle
             checkBox = obj.getValues(channelCheckBoxes);
             
             for i = 1:length(checkBox)
-                model.plotMap(checkBox(i).Tag) = checkBox(i).Value;
+                s= model.plotMap(checkBox(i).Tag);
+                s.active = checkBox(i).Value;
+                model.plotMap(checkBox(i).Tag) = s;
             end
         end
         
