@@ -13,7 +13,7 @@ classdef AmplifierRespModel < handle
         function obj = AmplifierRespModel()
         end
 
-        function [x,y] = getData(obj, epoch, amplifier)
+        function [x,y] = getData(obj, amplifier, epoch)
         	[r, s, ~] = epoch.response(amplifier);
         	x = (1:numel(r))/s;
             y = r;

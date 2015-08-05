@@ -44,7 +44,7 @@ classdef AmplifierRespController < handle
         end
         
         function channels = getChannels(obj)
-            channels = {'ch1', 'ch2', 'ch3', 'ch4'};
+            channels = obj.rigConfig.multiClampDeviceNames;
         end
         
         function ch = getActiveCheckBox(~, channels)

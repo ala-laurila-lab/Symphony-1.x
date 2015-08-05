@@ -12,6 +12,7 @@ classdef LabProtocol < SymphonyProtocol
         rigSwitchNames = {}
         graphing = true
         deviceBackgrounds = {}
+        amplifierResponses = []
     end
     
     properties (Constant, Hidden)
@@ -195,7 +196,11 @@ classdef LabProtocol < SymphonyProtocol
                 for s = 1:numel(obj.rigSwitchNames)
                     obj.SymphRigSwitches.switchesChanged(epoch.response(obj.rigSwitchNames{s}),s);
                 end
-            end    
+            end
+
+            if ~isempty(obj.amplifierResponses)
+                obj.amplifierResponses.handleEpoch(epoch);
+            end       
         end
         
         function completeRun(obj)
@@ -238,7 +243,11 @@ classdef LabProtocol < SymphonyProtocol
 
             if strcmp(displayName, 'Graphing Amplifier Response') && isempty(obj.GraphingAmplifierResponses)
                 obj.GraphingAmplifierResponses = module;
-            end                
+            end   
+
+            if strcmp(displayName, 'Amplifier Response')
+                obj.amplifierResponses = module;
+            end               
         end        
         
         function moduleUnRegister(obj, displayName)
@@ -256,6 +265,10 @@ classdef LabProtocol < SymphonyProtocol
 
             if strcmp(displayName, 'Graphing Amplifier Response')
                 obj.GraphingAmplifierResponses = [];
+            end   
+
+            if strcmp(displayName, 'Amplifier Response')
+                obj.amplifierResponses = [];
             end                
         end        
         

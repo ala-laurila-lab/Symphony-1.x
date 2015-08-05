@@ -36,14 +36,14 @@ classdef AmplifierRespGraphView < handle
             
             for i = 1:length(channels)
                 if obj.model.plotMap(channels{i})
-                    [x, y] = obj.model.getData(channels{i}, epoch)
-                    h = plot(obj.graph,data.x,data.y);
-                    plots = [plots, h];
+                    [x, y] = obj.model.getData(channels{i}, epoch);
+                    h = plot(obj.graph, x, y);
                     hold on;
                     obj.resetGraph
                 end
             end
             drawnow
+            %interactive_move
             hold off;
         end
     end
