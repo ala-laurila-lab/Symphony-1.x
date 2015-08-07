@@ -26,7 +26,8 @@ classdef AmplifierRespView  < handle
             set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
             
             obj.amplifierRespModel = model.AmplifierRespModel;
-            obj.amplifierRespController = controller.AmplifierRespController([]);
+            rigConfig = RigConfig;
+            obj.amplifierRespController = controller.AmplifierRespController(rigConfig);
             obj.amplifierRespController.configurePlots(obj.amplifierRespModel);
             obj.createView();
             
@@ -43,7 +44,7 @@ classdef AmplifierRespView  < handle
         
         function plot(obj,epoch)
             graphView = obj.amplifierRespGraphView;
-            graphView.plotGraph;
+            graphView.plotGraph(epoch);
             
         end
     end
