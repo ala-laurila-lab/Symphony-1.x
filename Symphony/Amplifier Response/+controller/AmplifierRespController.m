@@ -19,13 +19,33 @@ classdef AmplifierRespController < handle
         end
         
         function updatePlots(obj, ~, ~, channelCheckBoxes, model)
-            checkBox = obj.getValues(channelCheckBoxes);
+            checkBox = obj.getValues(channelCheckBoxes, []);
             
             for i = 1:length(checkBox)
-                s= model.plotMap(checkBox(i).Tag);
-                s.active = checkBox(i).Value;
-                model.plotMap(checkBox(i).Tag) = s;
+                tag = get(checkBox(i),'Tag');
+                s= model.plotMap(tag);
+                s.active = tag;
+                model.plotMap(tag) = s;
             end
+        end
+        
+        function autoScale(obj, hObj, ~, sliderX, sliderY, channelRadioBtns, model)
+            
+            model.autoScale = get(hObj, 'Value');
+            set(sliderX, 'Enable', 'off');
+            set(sliderY, 'Enable', 'off');
+            obj.groupRadio(hObj, channelRadioBtns);
+            
+        end
+        
+        function selectScalingChannel(obj, hObj, ~, sliderX, sliderY, channelRadioBtns, model)
+            
+            if model.autoScale
+                set(sliderX, 'Enable', 'on');
+                set(sliderY, 'Enable', 'on');
+            end
+            obj.groupRadio(hObj, channelRadioBtns);
+            model.autoScale = false;
         end
         
         function handleSliderX(~, hObj, eventData)
@@ -36,36 +56,30 @@ classdef AmplifierRespController < handle
             disp('To do handle response');
         end
         
-        function selectScalingChannel(obj, hObj, ~, channelRadioBtns)
-            arr = obj.getValues(channelRadioBtns);
-            nonSelectedChannels = arr(~ismember(arr,hObj));
-            
-            for i = 1:length(nonSelectedChannels)
-                nonSelectedChannels(i).Value = 0;
-            end
-        end
         
         function channels = getChannels(obj)
             channels = obj.rigConfig.multiClampDeviceNames;
         end
         
-        function ch = getActiveCheckBox(~, channels)
-            ch = {};
-            
-            for i = 1:length(channels)
-                if(channels(i).Value)
-                    ch = {ch, channels(i).Tag};
-                end
-            end
-            ch(~cellfun('isempty',ch));
+    end
+    
+    methods(Access = private)
+        
+        function groupRadio(obj, selected, buttons)
+            filter = @(x) ~strcmp(x.Tag, get(selected, 'Tag'));
+            nonSelectedChannels = obj.getValues(buttons, filter);
+            arrayfun(@(ch) set(ch, 'Value', 0), nonSelectedChannels);
         end
         
-        function v = getValues(~, s)
+        function v = getValues(~, s, filter)
             f = fieldnames(s);
             v = [];
             
             for i = 1:length(f)
-                v = [v get(s.(f{i}))];
+                c = get(s.(f{i}));
+                if isempty(filter) || filter(c)
+                    v = [v, s.(f{i})];
+                end
             end
         end
     end
