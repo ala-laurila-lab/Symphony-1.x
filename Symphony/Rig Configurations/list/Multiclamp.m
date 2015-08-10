@@ -24,11 +24,11 @@ classdef Multiclamp < LabRigConfiguration
             
             %% Adding the Rig Switches 
 
-%              obj.addDevice('Rig_Switches_0','', 'DIGITAL_IN.0');  % input only
-%              obj.addDevice('Rig_Switches_1','', 'DIGITAL_IN.1');  % input only
-%              obj.addDevice('Rig_Switches_2','', 'DIGITAL_IN.2');  % input only
-%              obj.addDevice('Rig_Switches_3','', 'DIGITAL_IN.3');  % input only
-%              obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
+               obj.addDevice('Rig_Switches_0','', 'DIGITAL_IN.0');  % input only
+               obj.addDevice('Rig_Switches_1','', 'DIGITAL_IN.1');  % input only
+               obj.addDevice('Rig_Switches_2','', 'DIGITAL_IN.2');  % input only
+               obj.addDevice('Rig_Switches_3','', 'DIGITAL_IN.3');  % input only
+               obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
 %              obj.addDevice('Rig_Switches_5','', 'DIGITAL_IN.5');  % input only
 %              obj.addDevice('Rig_Switches_6','', 'DIGITAL_IN.6');  % input only
 %              obj.addDevice('Rig_Switches_7','', 'DIGITAL_IN.7');  % input only
@@ -40,7 +40,7 @@ classdef Multiclamp < LabRigConfiguration
 %             obj.addDevice('Rig_Switches_13','', 'DIGITAL_IN.13');  % input only
             
             %% Adding the TTL Trigger
-            obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.1', '');
+            obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.2', '');
         end 
     end
 end
