@@ -24,7 +24,7 @@ classdef AmplifierRespController < handle
             for i = 1:length(checkBox)
                 tag = get(checkBox(i),'Tag');
                 s= model.plotMap(tag);
-                s.active = tag;
+                s.active = get(checkBox(i),'Value');
                 model.plotMap(tag) = s;
             end
         end
