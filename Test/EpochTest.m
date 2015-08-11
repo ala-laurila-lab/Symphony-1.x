@@ -13,6 +13,7 @@ classdef EpochTest < handle
         
         
         function [r, s, t] = response(obj, ch)
+           %{
             if ch == 'ch1'
                 r = obj.noise;
             elseif ch == 'ch2'
@@ -22,6 +23,8 @@ classdef EpochTest < handle
             elseif ch == 'ch4'
                 r = 30 + obj.noise;
             end
+            %}
+            r = obj.noise;
             s = 10000;
             t = [];
         end

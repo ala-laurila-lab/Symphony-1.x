@@ -32,12 +32,14 @@ classdef AmplifierRespGraphView < handle
         end
         
         function plotGraph(obj, epoch)
-           channels = obj.model.plotMap.keys;
+            channels = obj.model.plotMap.keys;
+            
             for i = 1:length(channels)
                 channelInfo = obj.model.plotMap(channels{i});
                 if channelInfo.active
-                    [x, y] = obj.model.getData(channels{i}, epoch);
+                    [x, y, threshold, indices] = obj.model.getData(channels{i}, epoch);
                     h = plot(obj.graph, x, y, 'color', channelInfo.color);
+                    refline([0 threshold]);
                     hold(obj.graph, 'on');
                     obj.resetGraph
                 end

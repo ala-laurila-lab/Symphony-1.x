@@ -14,7 +14,7 @@ classdef AmplifierRespController < handle
         
         function configurePlots(obj, model)
             plotsKey = obj.getChannels;
-            plotsValue = model.initPlotMapValues(length(plotsKey));
+            plotsValue = model.init(plotsKey);
             model.plotMap = containers.Map(plotsKey,plotsValue);
         end
         
@@ -22,40 +22,56 @@ classdef AmplifierRespController < handle
             checkBox = obj.getValues(channelCheckBoxes, []);
             
             for i = 1:length(checkBox)
-                tag = get(checkBox(i),'Tag');
-                s= model.plotMap(tag);
-                s.active = get(checkBox(i),'Value');
-                model.plotMap(tag) = s;
+                ch = get(checkBox(i),'Tag');
+                model.set(ch, 'active', get(checkBox(i), 'value'));
             end
         end
         
-        function autoScale(obj, hObj, ~, sliderX, sliderY, channelRadioBtns, model)
+        function autoScale(obj, hObj, ~, shiftY, scaleY, channelRadioBtns, model)
             
             model.autoScale = get(hObj, 'Value');
-            set(sliderX, 'Enable', 'off');
-            set(sliderY, 'Enable', 'off');
+            set(shiftY, 'Enable', 'off');
+            set(scaleY, 'Enable', 'off');
             obj.groupRadio(hObj, channelRadioBtns);
             
         end
         
-        function selectScalingChannel(obj, hObj, ~, sliderX, sliderY, channelRadioBtns, model)
+        function selectScalingChannel(obj, hObj, ~, shiftY, scaleY, channelRadioBtns, model)
             
             if model.autoScale
-                set(sliderX, 'Enable', 'on');
-                set(sliderY, 'Enable', 'on');
+                set(shiftY, 'Enable', 'on');
+                set(scaleY, 'Enable', 'on');
             end
             obj.groupRadio(hObj, channelRadioBtns);
             model.autoScale = false;
+            set(shiftY, 'value', model.plotMap(get(hObj, 'Tag')).shift);
+            set(scaleY, 'value', model.plotMap(get(hObj, 'Tag')).scale);
         end
         
-        function handleSliderX(~, hObj, eventData)
-            disp('To do handle response');
+        function shiftYAxis(obj, hObj, ~, channelRadioBtns, model)
+            ch = obj.getActiveRadio(channelRadioBtns);
+            model.set(ch, 'shift', get(hObj, 'value'));
         end
         
-        function handleSliderY(~, hObj, eventData)
-            disp('To do handle response');
+        function scaleYAxis(obj, hObj, ~, channelRadioBtns, model)
+            ch = obj.getActiveRadio(channelRadioBtns);
+            model.set(ch, 'scale', get(hObj, 'value'));
         end
         
+        function setThreshold(obj, hObj, ~, channelRadioBtns, model)
+            ch = obj.getActiveRadio(channelRadioBtns);
+            spd = model.spikeDetectorMap(ch);
+            spd.threshold = str2double(get(hObj, 'String'));
+            spd.direction = sign(spd.threshold);
+        end
+        
+        function enableSpikeDetection(obj, hObj, ~, channelRadioBtns, threshold, model)
+             ch = obj.getActiveRadio(channelRadioBtns);
+             spd = model.spikeDetectorMap(ch);
+             spd.threshold = str2double(get(threshold, 'String'));
+             spd.direction = sign(spd.threshold);
+             spd.enabled = true;
+        end
         
         function channels = getChannels(obj)
             channels = obj.rigConfig.multiClampDeviceNames;
@@ -64,6 +80,12 @@ classdef AmplifierRespController < handle
     end
     
     methods(Access = private)
+        
+        function channel = getActiveRadio(obj, buttons)
+            activeRadioFilter = @(x) x.Value == 1;
+            components = obj.getValues(buttons, activeRadioFilter);
+            channel = get(components, 'Tag');
+        end
         
         function groupRadio(obj, selected, buttons)
             filter = @(x) ~strcmp(x.Tag, get(selected, 'Tag'));

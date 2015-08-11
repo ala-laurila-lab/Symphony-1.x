@@ -5,6 +5,11 @@ classdef SpikeDetector < handle
     properties
         threshold
         direction
+        enabled = false
+    end
+    
+    properties(Access = private)
+          amplifier
     end
     
     
@@ -14,12 +19,15 @@ classdef SpikeDetector < handle
     
     
     methods
-        function obj = SpikeDetector()
+        function obj = SpikeDetector(amplifier)
+            obj.threshold = 0;
+            obj.direction = sign(0);
+            obj.amplifier = amplifier;
         end
         
-        function indices = detect(obj, amplifier, epoch)
+        function indices = detect(obj, epoch)
             if obj.isvalid
-                [data, ~, ~] = epoch.response(amplifier);
+                [data, ~, ~] = epoch.response(obj.amplifier);
                 indices = util.Signal.getIndicesByThreshold(data, obj.threshold, obj.direction);
             end
         end
