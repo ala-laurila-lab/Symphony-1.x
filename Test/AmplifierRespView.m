@@ -28,7 +28,7 @@ classdef AmplifierRespView  < handle
             obj.amplifierRespModel = model.AmplifierRespModel;
             rigConfig = RigConfig;
             obj.amplifierRespController = controller.AmplifierRespController(rigConfig);
-            obj.amplifierRespController.configurePlots(obj.amplifierRespModel);
+            obj.amplifierRespController.init(obj.amplifierRespModel);
             obj.createView();
             
         end
@@ -45,7 +45,6 @@ classdef AmplifierRespView  < handle
         function plot(obj,epoch)
             graphView = obj.amplifierRespGraphView;
             graphView.plotGraph(epoch);
-            
         end
     end
     

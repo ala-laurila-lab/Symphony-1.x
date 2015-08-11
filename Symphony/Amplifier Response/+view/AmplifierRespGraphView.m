@@ -36,12 +36,18 @@ classdef AmplifierRespGraphView < handle
             
             for i = 1:length(channels)
                 channelInfo = obj.model.plotMap(channels{i});
+                
                 if channelInfo.active
-                    [x, y, threshold, indices] = obj.model.getData(channels{i}, epoch);
+                    [x, y, threshold, spike_x, spike_y] = obj.model.getData(channels{i}, epoch);
                     h = plot(obj.graph, x, y, 'color', channelInfo.color);
-                    refline([0 threshold]);
+                    
+                    if ~isempty(spike_x)
+                        hold(obj.graph, 'on')
+                        plot(obj.graph, spike_x, spike_y, 'b*');
+                    end
+                    refline(obj.graph, [0 threshold]);
                     hold(obj.graph, 'on');
-                    obj.resetGraph
+                    obj.resetGraph;
                 end
             end
             drawnow

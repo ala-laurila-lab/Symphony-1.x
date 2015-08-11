@@ -12,10 +12,11 @@ classdef AmplifierRespController < handle
             obj.rigConfig = rigConfig;
         end
         
-        function configurePlots(obj, model)
-            plotsKey = obj.getChannels;
-            plotsValue = model.init(plotsKey);
-            model.plotMap = containers.Map(plotsKey,plotsValue);
+        function init(obj, model)
+            key = obj.getChannels;
+            model.channels = key
+            value = model.init(key);
+            model.plotMap = containers.Map(key,value);
         end
         
         function updatePlots(obj, ~, ~, channelCheckBoxes, model)
@@ -48,6 +49,12 @@ classdef AmplifierRespController < handle
             set(scaleY, 'value', model.plotMap(get(hObj, 'Tag')).scale);
         end
         
+        function setShiftProperties(obj, h, d, min, max, shiftY, model)
+            set(shiftY, 'Min', str2double(get(min, 'String')) );
+            set(shiftY, 'Max', str2double(get(max, 'String')) );
+            set(shiftY, 'Value', str2double(get(min, 'String')) );
+        end
+
         function shiftYAxis(obj, hObj, ~, channelRadioBtns, model)
             ch = obj.getActiveRadio(channelRadioBtns);
             model.set(ch, 'shift', get(hObj, 'value'));
