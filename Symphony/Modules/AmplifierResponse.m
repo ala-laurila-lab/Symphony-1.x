@@ -6,7 +6,6 @@ classdef AmplifierResponse < Module
 
 	properties(Access = private)
 		infoLayout
-
         amplifierRespGraphView
         amplifierRespControlView
         amplifierRespController
@@ -23,7 +22,7 @@ classdef AmplifierResponse < Module
 			rigConfig = obj.symphonyUI.rigConfig;
 			obj.amplifierRespModel = model.AmplifierRespModel;
             obj.amplifierRespController = controller.AmplifierRespController(rigConfig);
-            obj.amplifierRespController.configurePlots(obj.amplifierRespModel);
+            obj.amplifierRespController.init(obj.amplifierRespModel);
 
             obj.createView();
 		end

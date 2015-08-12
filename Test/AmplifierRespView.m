@@ -3,15 +3,19 @@ classdef AmplifierRespView  < handle
     %   Detailed explanation goes here
     
     properties
-        amplifierRespGraphView
-        amplifierRespControlView
-        amplifierRespController
-        amplifierRespModel
+        model
     end
     
     properties(Access = private)
         figureHandle
         infoLayout
+        graphView
+        controlView
+        controller
+    end
+    
+    events
+        plotSpikeStats
     end
     
     methods
@@ -25,10 +29,11 @@ classdef AmplifierRespView  < handle
             set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
             set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
             
-            obj.amplifierRespModel = model.AmplifierRespModel;
+            obj.model = model.AmplifierRespModel;
             rigConfig = RigConfig;
-            obj.amplifierRespController = controller.AmplifierRespController(rigConfig);
-            obj.amplifierRespController.init(obj.amplifierRespModel);
+            obj.controller = controller.AmplifierRespController(rigConfig);
+            obj.controller.init(obj.model);
+            obj.controller.addListener(obj, 'plotSpikeStats')
             obj.createView();
             
         end
@@ -37,14 +42,15 @@ classdef AmplifierRespView  < handle
             layout = uiextras.VBox(...
                 'Parent', obj.figureHandle);
             obj.infoLayout = uiextras.HBox('Parent',layout);
-            obj.amplifierRespGraphView = view.AmplifierRespGraphView(obj.amplifierRespModel, obj.amplifierRespController, layout);
-            obj.amplifierRespControlView = view.AmplifierRespControlView(obj.amplifierRespModel, obj.amplifierRespController, layout);
+            obj.graphView = view.AmplifierRespGraphView(obj.model, obj.controller, layout);
+            obj.controlView = view.AmplifierRespControlView(obj.model, obj.controller, layout);
             set(layout, 'Sizes', [-0.5 -5 120]);
         end
         
         function plot(obj,epoch)
-            graphView = obj.amplifierRespGraphView;
-            graphView.plotGraph(epoch);
+            obj.graphView.plotGraph(epoch);
+            spd = obj.model.spikeDetectorMap;
+            notify(obj, 'plotSpikeStats');
         end
     end
     

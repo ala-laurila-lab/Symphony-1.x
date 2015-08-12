@@ -3,13 +3,12 @@ classdef AmplifierRespModel < handle
     %   Detailed explanation goes here
     
     properties
-        plotMap
+        plotsContainer
         autoScale = false
         spikeDetectorMap
-        isSpikeDetectionEnabled = false
         channels
     end
-
+    
     methods
         
         function obj = AmplifierRespModel()
@@ -19,7 +18,7 @@ classdef AmplifierRespModel < handle
             spike_x = [];
             spike_y = [];
             
-            changeOffset = @(x) x * obj.plotMap(amplifier).scale + obj.plotMap(amplifier).shift;
+            changeOffset = @(x) x * obj.plotsContainer(amplifier).scale + obj.plotsContainer(amplifier).shift;
             spikeDetector = obj.spikeDetectorMap(amplifier);
             [r, s, ~] = epoch.response(amplifier);
             x = (1:numel(r))/s;
@@ -49,9 +48,9 @@ classdef AmplifierRespModel < handle
         end
         
         function set(obj, channel, property, value)
-            s= obj.plotMap(channel);
+            s= obj.plotsContainer(channel);
             s.(property) = value;
-            obj.plotMap(channel) = s;
+            obj.plotsContainer(channel) = s;
         end
     end
 end

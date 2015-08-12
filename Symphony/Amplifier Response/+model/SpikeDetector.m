@@ -30,6 +30,7 @@ classdef SpikeDetector < handle
                 [data, ~, ~] = epoch.response(obj.amplifier);
                 indices = util.Signal.getIndicesByThreshold(data, obj.threshold, obj.direction);
             end
+            %fprintf('intensity [%d] no of repeats [%d]', epoch.getParameter('numberOfIntensities'), epoch.getParameter('numberOfRepeats'));
         end
     end
     

@@ -4,6 +4,7 @@ classdef AmplifierRespController < handle
     
     properties
         rigConfig
+        plotRepository
     end
     
     methods
@@ -14,9 +15,9 @@ classdef AmplifierRespController < handle
         
         function init(obj, model)
             key = obj.getChannels;
-            model.channels = key
+            model.channels = key;
             value = model.init(key);
-            model.plotMap = containers.Map(key,value);
+            model.plotsContainer = containers.Map(key,value);
         end
         
         function updatePlots(obj, ~, ~, channelCheckBoxes, model)
@@ -45,8 +46,8 @@ classdef AmplifierRespController < handle
             end
             obj.groupRadio(hObj, channelRadioBtns);
             model.autoScale = false;
-            set(shiftY, 'value', model.plotMap(get(hObj, 'Tag')).shift);
-            set(scaleY, 'value', model.plotMap(get(hObj, 'Tag')).scale);
+            set(shiftY, 'value', model.plotsContainer(get(hObj, 'Tag')).shift);
+            set(scaleY, 'value', model.plotsContainer(get(hObj, 'Tag')).scale);
         end
         
         function setShiftProperties(obj, h, d, min, max, shiftY, model)
@@ -82,6 +83,10 @@ classdef AmplifierRespController < handle
         
         function channels = getChannels(obj)
             channels = obj.rigConfig.multiClampDeviceNames;
+        end
+        
+        function addListener(obj, src, eventName)
+            obj.plotRepository = util.PlotRepository(src, eventName);
         end
         
     end

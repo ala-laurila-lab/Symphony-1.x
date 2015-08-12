@@ -32,10 +32,10 @@ classdef AmplifierRespGraphView < handle
         end
         
         function plotGraph(obj, epoch)
-            channels = obj.model.plotMap.keys;
+            channels = obj.model.plotsContainer.keys;
             
             for i = 1:length(channels)
-                channelInfo = obj.model.plotMap(channels{i});
+                channelInfo = obj.model.plotsContainer(channels{i});
                 
                 if channelInfo.active
                     [x, y, threshold, spike_x, spike_y] = obj.model.getData(channels{i}, epoch);
@@ -45,7 +45,7 @@ classdef AmplifierRespGraphView < handle
                         hold(obj.graph, 'on')
                         plot(obj.graph, spike_x, spike_y, 'b*');
                     end
-                    refline(obj.graph, [0 threshold]);
+                    %refline(obj.graph, 0, threshold);
                     hold(obj.graph, 'on');
                     obj.resetGraph;
                 end
