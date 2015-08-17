@@ -38,7 +38,7 @@ classdef Multiclamp < LabRigConfiguration
 %             obj.addDevice('Rig_Switches_13','', 'DIGITAL_IN.13');  % input only
             
             %% Adding the TTL Trigger
-            obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.1', '');
+            obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.0', '');
         end 
     end
 end

@@ -26,13 +26,12 @@ classdef LabRigConfiguration < RigConfiguration
         %% Log Functions
         function setDeviceBackground(obj, devName, value, devUnit)
             setDeviceBackground@RigConfiguration(obj, devName, value, devUnit);
+            formatSpec = '%d%s';
+            obj.symphonyUI.protocol.deviceBackgrounds.(devName) = sprintf(formatSpec, value, devUnit);
             if(obj.symphonyUI.protocol.loggingIsValid)
                 formatSpec = 'Time:%s%sDevice:%s%s%d%s';
                 s = sprintf(formatSpec, datestr(now, obj.timeString), obj.logTab, devName, obj.logTab, value, devUnit);
                 obj.symphonyUI.protocol.sendToLog(s);
-                
-                formatSpec = '%d%s';
-                obj.symphonyUI.protocol.deviceBackgrounds.(devName) = sprintf(formatSpec, value, devUnit);
             end
         end
         
