@@ -27,7 +27,7 @@ classdef LEDFactorPulse < LabProtocol
         tailTime = 50
         numberOfIntensities = 5
         numberOfRepeats = 1
-        interpulseInterval = 1
+        interpulseInterval = 0
         ampHoldSignal = -50
         %lightRange = {'pico','nano','micro','raw'}
     end
