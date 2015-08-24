@@ -7,6 +7,7 @@ classdef AmplifierRespModel < handle
         autoScale = false
         spikeDetectorMap
         channels
+        selectedListChannels
     end
     
     methods

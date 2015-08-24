@@ -20,7 +20,7 @@ classdef AmplifierRespController < handle
             model.plotsContainer = containers.Map(key,value);
         end
         
-        function updatePlots(obj, ~, ~, channelCheckBoxes, model)
+        function updatePlots(obj, model, channelCheckBoxes)
             checkBox = obj.getValues(channelCheckBoxes, []);
             
             for i = 1:length(checkBox)
@@ -29,13 +29,16 @@ classdef AmplifierRespController < handle
             end
         end
         
+        function selectChannel(obj, model, h)
+            model.selectedListChannels = model.channels(get(h ,'Value'));
+        end
+        
         function autoScale(obj, hObj, ~, shiftY, scaleY, channelRadioBtns, model)
             
             model.autoScale = get(hObj, 'Value');
             set(shiftY, 'Enable', 'off');
             set(scaleY, 'Enable', 'off');
             obj.groupRadio(hObj, channelRadioBtns);
-            
         end
         
         function selectScalingChannel(obj, hObj, ~, shiftY, scaleY, channelRadioBtns, model)
