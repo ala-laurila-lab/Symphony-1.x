@@ -17,6 +17,7 @@ classdef AmpRespView < handle
         startSpikeDetection
         stopSpikeDetection
         setThreshold
+        plotSpikeStats
     end
     
     methods

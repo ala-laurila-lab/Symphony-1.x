@@ -6,13 +6,20 @@ classdef AmpRespPresenter < handle
         ampRespView
         ampRespModel
         listeners
+        plotRepo
+        genericTO;
+    end
+    
+    properties(Constant)
+        SPIKE_STATS_FOLDER = 'Plots';
     end
     
     methods
         
-        function obj = AmpRespPresenter(model, view, app)
+        function obj = AmpRespPresenter(model, view)
             obj.ampRespModel = model;
             obj.ampRespView = view;
+            obj.plotRepo = util.PlotRepository(obj.SPIKE_STATS_FOLDER);
         end
         
         function init(obj)
@@ -21,6 +28,8 @@ classdef AmpRespPresenter < handle
             addlistener(v, 'startSpikeDetection', @obj.startSpikeDetection);
             addlistener(v, 'stopSpikeDetection', @obj.stopSpikeDetection);
             addlistener(v, 'setThreshold', @obj.setThreshold);
+            obj.genericTO = trasferObject.GenericTO;
+            obj.plotRepo.addlistener(v, 'plotSpikeStats', obj.genericTO);
         end
         
         function updateAmplifiers(obj, ~, eventData)

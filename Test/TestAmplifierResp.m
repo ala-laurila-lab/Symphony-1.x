@@ -27,13 +27,14 @@ classdef TestAmplifierResp  < handle
             app = MockRigConfig;
             model = model.AmpRespModel(app.multiClampDeviceNames);
             view = view.AmpRespView(obj.figureHandle);
-            obj.presenter = presenter.AmpRespPresenter(model, view, []);
+            obj.presenter = presenter.AmpRespPresenter(model, view);
             obj.presenter.init
             obj.presenter.show
         end
         
          function handleEpoch(obj, epoch)
             obj.presenter.plotGraph(epoch);
+            
         end 
     end
 end

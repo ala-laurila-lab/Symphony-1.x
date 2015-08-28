@@ -4,19 +4,26 @@ classdef PlotRepository < handle
     
     properties(Access = 'private')
         listeners = {};
+        folder
     end
     
     properties(Constant)
-        DIR =  fullfile(regexprep(userpath, ';', ''), 'Plots')
+        
         EXTENSION = '.m'
         START_IDX = 3;
     end
     
+    
     methods
         
-        function obj = PlotRepository(source, eventName)
-            plotDir = dir(obj.DIR);
+        function obj = PlotRepository(folder)
+            obj.folder = folder;
+        end
+        
+        function  addlistener(obj, source, eventName, transferObject)
+            plotDir = dir(fullfile(regexprep(userpath, ';', ''), obj.folder));
             noOfPlots = length(plotDir);
+            
             for i = obj.START_IDX:noOfPlots
                 name = strrep(plotDir(i).name, obj.EXTENSION, '');
                 fig = figure( ...
@@ -25,7 +32,7 @@ classdef PlotRepository < handle
                     'Toolbar', 'none', ...
                     'NumberTitle', 'off',...
                     'Visible', 'off');
-                fun = str2func( ['@(src, data)' name '(src, data,' num2str(fig) ')']);
+                fun = str2func( ['@(src, data)' name '(src, data,' num2str(fig), transferObject ')']);
                 obj.listeners{i - obj.START_IDX + 1} = addlistener(source, eventName, fun);
             end
         end
