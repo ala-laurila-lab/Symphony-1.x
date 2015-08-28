@@ -1,4 +1,4 @@
-classdef RigConfig < handle
+classdef MockRigConfig < handle
     %RIGCONFIG Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -6,7 +6,7 @@ classdef RigConfig < handle
     end
     
     methods
-        function obj = RigConfig()
+        function obj = MockRigConfig()
         end
 
     	function channels = multiClampDeviceNames(obj)

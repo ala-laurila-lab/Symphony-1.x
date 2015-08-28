@@ -8,6 +8,8 @@ classdef AmpRespView < handle
         graph
         channelChkBoxes
         thresholdTxt
+        spikeDetectionEnabled
+        spikeDetectionDisabled
     end
     
     events
@@ -28,6 +30,7 @@ classdef AmpRespView < handle
                 'Parent', obj.figureHandle);
             obj.infoLayout = uiextras.HBox('Parent',layout);
             obj.graphView(layout);
+            obj.resetGraph;
             obj.controlView(layout, channels);
             set(layout, 'Sizes', [-0.5 -5 120]);
         end
@@ -57,12 +60,12 @@ classdef AmpRespView < handle
         end
         
         function plotEpoch(obj, x , y, props)
-            plot(obj.graph, x, y, 'color', props.color);
+            plot(obj.graph, x, y, 'color', props('color'));
             hold(obj.graph, 'on');
         end
         
         function plotSpike(obj, x , y, props)
-            plot(obj.graph, x, y, props.style);
+            plot(obj.graph, x, y, props('style'));
             hold(obj.graph, 'on');
         end
     end
@@ -110,10 +113,11 @@ classdef AmpRespView < handle
                 'Parent', labelLayout,...
                 'Style','text',...
                 'String','Spike Threshold');
-            uicontrol(...,
+            obj.spikeDetectionEnabled = uicontrol(...,
                 'Parent', labelLayout,...
                 'Style','pushbutton',...
                 'String','Enable', ...
+                'Value', 1,...
                 'callback',@(h, d)notify(obj, 'startSpikeDetection'));
             
             obj.thresholdTxt = uicontrol(...,
@@ -121,10 +125,11 @@ classdef AmpRespView < handle
                 'Style','Edit',...
                 'String','00.000',...
                 'callback',@(h, d)notify(obj, 'setThreshold'));
-            uicontrol(...,
+            obj.spikeDetectionDisabled = uicontrol(...,
                 'Parent', controlLayout,...
                 'Style','pushbutton',...
                 'String','Disable', ...
+                'Value', 0,...
                 'callback',@(h, d)notify(obj, 'stopSpikeDetection'));
         end
     end

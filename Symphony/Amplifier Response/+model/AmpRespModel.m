@@ -7,25 +7,27 @@ classdef AmpRespModel < handle
         plots
         plotKeys = {'active', 'color', 'shift', 'scale', 'style'}
         colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
-        plotContainer
     end
     
     methods
         
         function obj = AmpRespModel(channels)
             obj.plots = struct();
+            obj.channels = channels;
+            
             for i = 1:length(channels)
+                ch = channels{i};
                 values = {false, obj.colorSet{i}, 0, 1, 'b*'};
-                obj.plots.(channels{i}).props = containes.Map(obj.plotKeys, values);
-                obj.plots.(channels{i}).SpikeDetector = model.SpikeDetector;
+                obj.plots.(ch).props = containers.Map(obj.plotKeys, values);
+                obj.plots.(ch).SpikeDetector = model.SpikeDetector(ch);
             end
         end
         
         function [x, y, props] = getReponse(obj, channel, epoch)
             [r, s, ~] = epoch.response(channel);
             x = (1:numel(r))/s;
-            y = obj.changeOffset(r);
-            props = obj.plots.(ch).props;
+            y = obj.changeOffSet(r, channel);
+            props = obj.plots.(channel).props;
         end
         
         function [x, y] = getSpike(obj, channel, epoch)
@@ -33,8 +35,8 @@ classdef AmpRespModel < handle
             
             spd = obj.plots.(channel).SpikeDetector;
             if spd.enabled
-                [x ,y] = getReponse(obj, channel, epoch)
-                indices = spd.detect(epoch);
+                [x ,y] = getReponse(obj, channel, epoch);
+                [indices, s] = spd.detect(epoch);
                 x = indices/s;
                 y = y(indices);
             end
@@ -51,13 +53,26 @@ classdef AmpRespModel < handle
         end
         
         function activeChannels = getActiveChannels(obj)
-            activeChannels = [];
+            activeChannels = {};
             chs = obj.channels;
+            idx = 1;
+            
             for i =1:length(chs)
                 if obj.plots.(chs{i}).props('active') == 1
-                    activeChannels = [chs{i} ;activeChannels]
+                    activeChannels{idx} = chs{i};
+                    idx = idx + 1;
                 end
             end
+        end
+        
+        function setThreshold(obj, channel, thresholdTxt)
+            spd = obj.plots.(channel).SpikeDetector;
+            spd.threshold = thresholdTxt;
+        end
+        
+        function setSpikeDetector(obj, channel, state)
+            spd = obj.plots.(channel).SpikeDetector;
+            spd.enabled = state;
         end
     end
     

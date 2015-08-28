@@ -4,7 +4,6 @@ classdef SpikeDetector < handle
     
     properties
         threshold
-        direction
         enabled = false
     end
     
@@ -21,14 +20,13 @@ classdef SpikeDetector < handle
     methods
         function obj = SpikeDetector(amplifier)
             obj.threshold = 0;
-            obj.direction = sign(0);
             obj.amplifier = amplifier;
         end
         
-        function indices = detect(obj, epoch)
+        function [indices, s] = detect(obj, epoch)
             if obj.isvalid
-                [data, ~, ~] = epoch.response(obj.amplifier);
-                indices = util.Signal.getIndicesByThreshold(data, obj.threshold, obj.direction);
+                [data, s, ~] = epoch.response(obj.amplifier);
+                indices = util.Signal.getIndicesByThreshold(data, obj.threshold, sign(obj.threshold));
             end
             %fprintf('intensity [%d] no of repeats [%d]', epoch.getParameter('numberOfIntensities'), epoch.getParameter('numberOfRepeats'));
         end
@@ -37,7 +35,7 @@ classdef SpikeDetector < handle
     methods(Access = private)
         
         function valid = isValid(obj)
-            valid = ~isempty(obj.threshold) && ~isempty(obj.direction);
+            valid = ~isempty(obj.threshold);
         end
     end   
 end
