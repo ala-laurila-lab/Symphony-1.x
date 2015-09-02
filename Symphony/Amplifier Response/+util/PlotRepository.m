@@ -20,7 +20,7 @@ classdef PlotRepository < handle
             obj.folder = folder;
         end
         
-        function  addlistener(obj, source, eventName, transferObject)
+        function  addlistener(obj, source, eventName)
             plotDir = dir(fullfile(regexprep(userpath, ';', ''), obj.folder));
             noOfPlots = length(plotDir);
             
@@ -32,7 +32,7 @@ classdef PlotRepository < handle
                     'Toolbar', 'none', ...
                     'NumberTitle', 'off',...
                     'Visible', 'off');
-                fun = str2func( ['@(src, data)' name '(src, data,' num2str(fig), transferObject ')']);
+                fun = str2func( ['@(src, data)' name '(src, data,' num2str(fig) ')']);
                 obj.listeners{i - obj.START_IDX + 1} = addlistener(source, eventName, fun);
             end
         end

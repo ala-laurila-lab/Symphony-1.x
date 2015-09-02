@@ -7,6 +7,20 @@ classdef AmpRespModel < handle
         plots
         plotKeys = {'active', 'color', 'shift', 'scale', 'style'}
         colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
+        epochId = 0
+        lastProtocol
+        parameterSchema = {...,
+            'initialPulseAmplitude',...
+            'scalingFactor',...
+            'preTime',...
+            'stimTime',...
+            'tailTime',...
+            'numberOfIntensities',...
+            'numberOfRepeats',...
+            'interpulseInterval',...
+            'ampHoldSignal',...
+            'backgroundAmplitude'};
+        
     end
     
     methods
@@ -36,7 +50,7 @@ classdef AmpRespModel < handle
             spd = obj.plots.(channel).SpikeDetector;
             if spd.enabled
                 [x ,y] = getReponse(obj, channel, epoch);
-                [indices, s] = spd.detect(epoch);
+                [indices, s] = spd.detect(epoch, obj.epochId);
                 x = indices/s;
                 y = y(indices);
             end
@@ -73,6 +87,40 @@ classdef AmpRespModel < handle
         function setSpikeDetector(obj, channel, state)
             spd = obj.plots.(channel).SpikeDetector;
             spd.enabled = state;
+        end
+        
+        function map = getSpikeDetectorContainer(obj)
+            chs = obj.channels;
+            spd = cell(1,length(chs));
+            for i = 1:length(chs)
+                spd{i} = obj.plots.(chs{i}).SpikeDetector;
+            end
+            map = containers.Map(chs, spd);
+        end
+        
+        %TODO refactor this piece code for better understanding and
+        %simplicity
+        function changed = isProtocolChanged(obj, epoch)
+            obj.epochId = obj.epochId + 1;
+            schema = obj.parameterSchema;
+            notChanged = true;
+            
+            if isempty(obj.lastProtocol)
+                obj.lastProtocol = epoch.parameters;
+            else
+                old = obj.lastProtocol;
+                new = epoch.parameters;
+                for i = 1:length(schema)
+                    notChanged = isequal( old.(schema{i}), new.(schema{i}) ) && notChanged;
+                end
+            end
+            changed = ~ notChanged;
+        end
+        
+        function reset(obj)
+            obj.epochId = 0;
+            obj.lastProtocol = [];
+            cellfun(@(ch) obj.plots.(ch).SpikeDetector.clearIndices, obj.channels);
         end
     end
     

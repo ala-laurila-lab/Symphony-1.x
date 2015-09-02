@@ -3,30 +3,30 @@ classdef MockEpoch < handle
     %   Detailed explanation goes here
     
     properties
-        noise
+        data
+        index = 1
+        parameters
     end
     
     methods
         function obj = MockEpoch
-            obj.noise = randn(1,10000);
+            temp = load('cellData.mat');
+            obj.data = temp.data;
         end
-        
         
         function [r, s, t] = response(obj, ch)
-            r = obj.noise;
-            if ch == 'ch1'
-                r = obj.noise;
-            elseif ch == 'ch2'
-                r = 10 + obj.noise;
-            elseif ch == 'ch3'
-                r = 20 + obj.noise;
-            elseif ch == 'ch4'
-                r = 30 + obj.noise;
+            [r, s, t] = obj.data.epochs(obj.index).getData;
+            obj.index = obj.index + 1;
+        end
+        
+        function p = get.parameters(obj)
+            map = obj.data.epochs(obj.index).attributes;
+            k = map.keys;
+            p = struct();
+            for i = 1:length(k)
+                p.(k{i}) = map(k{i});
             end
-            s = 10000;
-            t = [];
         end
     end
-    
 end
 

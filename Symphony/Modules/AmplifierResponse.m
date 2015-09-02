@@ -1,53 +1,42 @@
 classdef AmplifierResponse < Module
-	
-	properties(Constant)
-		displayName = 'Amplifier Response'
-	end
-
-	properties(Access = private)
-		infoLayout
-        amplifierRespGraphView
-        amplifierRespControlView
-        amplifierRespController
-        amplifierRespModel
-	end
-
-
-	methods
-
-		function obj = AmplifierResponse(symphonyUI)
-			obj = obj@Module(symphonyUI);
-			obj.symphonyUI.protocol.moduleRegister(obj.displayName, obj);
-
-			rigConfig = obj.symphonyUI.rigConfig;
-			obj.amplifierRespModel = model.AmplifierRespModel;
-            obj.amplifierRespController = controller.AmplifierRespController(rigConfig);
-            obj.amplifierRespController.init(obj.amplifierRespModel);
-
-            obj.createView();
-		end
+    
+    properties(Constant)
+        displayName = 'Amplifier Response'
+    end
+    
+    properties(Access = private)
+        presenter
+    end
+    
+    
+    methods
+        
+        function obj = AmplifierResponse(symphonyUI)
+            obj = obj@Module(symphonyUI);
+            obj.symphonyUI.protocol.moduleRegister(obj.displayName, obj);
+            obj.createView
+        end
         
         function createView(obj)
-        	set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
+            rigConfig = obj.symphonyUI.rigConfig;
+            set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
             set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
-            layout = uiextras.VBox(...
-                'Parent', obj.figureHandle);
-            obj.infoLayout = uiextras.HBox('Parent', layout);
             
-            obj.amplifierRespGraphView = view.AmplifierRespGraphView(obj.amplifierRespModel, obj.amplifierRespController, layout);
-            obj.amplifierRespControlView = view.AmplifierRespControlView(obj.amplifierRespModel, obj.amplifierRespController, layout);
+            model = model.AmpRespModel(rigConfig.multiClampDeviceNames);
+            view = view.AmpRespView(obj.figureHandle);
+            obj.presenter = presenter.AmpRespPresenter(model, view);
             
-            set(layout, 'Sizes', [-0.5 -5 120]);
+            obj.presenter.init
+            obj.presenter.show
         end
-
+        
         function handleEpoch(obj, epoch)
-            graphView = obj.amplifierRespGraphView;
-            graphView.plotGraph(epoch);
+            obj.presenter.plotGraph(epoch);
         end
-
+        
         function close(obj)
             obj.symphonyUI.protocol.moduleUnRegister(obj.displayName);
             close@Module(obj)
         end
-	end
+    end
 end

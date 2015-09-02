@@ -8,6 +8,7 @@ classdef AmpRespPresenter < handle
         listeners
         plotRepo
         genericTO;
+        app;
     end
     
     properties(Constant)
@@ -28,8 +29,9 @@ classdef AmpRespPresenter < handle
             addlistener(v, 'startSpikeDetection', @obj.startSpikeDetection);
             addlistener(v, 'stopSpikeDetection', @obj.stopSpikeDetection);
             addlistener(v, 'setThreshold', @obj.setThreshold);
-            obj.genericTO = trasferObject.GenericTO;
-            obj.plotRepo.addlistener(v, 'plotSpikeStats', obj.genericTO);
+            obj.genericTO = transferObject.GenericTO;
+            obj.genericTO.persistant.spd = obj.ampRespModel.getSpikeDetectorContainer;
+            obj.plotRepo.addlistener(v, 'plotSpikeStats');
         end
         
         function updateAmplifiers(obj, ~, eventData)
@@ -65,6 +67,9 @@ classdef AmpRespPresenter < handle
         
         function plotGraph(obj, epoch)
             m = obj.ampRespModel;
+            if m.isProtocolChanged(epoch)
+                m.reset;
+            end
             v = obj.ampRespView;
             chs = m.getActiveChannels;
            
@@ -76,6 +81,8 @@ classdef AmpRespPresenter < handle
             end
             v.resetGraph;
             v.renderGraph;
+            obj.genericTO.transient.epoch = epoch;
+            notify(v, 'plotSpikeStats', util.EventData('obj', obj.genericTO));
         end
         
         function destroy(obj)

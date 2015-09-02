@@ -5,6 +5,7 @@ classdef SpikeDetector < handle
     properties
         threshold
         enabled = false
+        indices
     end
     
     properties(Access = private)
@@ -18,17 +19,24 @@ classdef SpikeDetector < handle
     
     
     methods
+        
         function obj = SpikeDetector(amplifier)
             obj.threshold = 0;
             obj.amplifier = amplifier;
+            obj.indices = containers.Map;
         end
         
-        function [indices, s] = detect(obj, epoch)
+        function [indices, s] = detect(obj, epoch, id)
             if obj.isvalid
                 [data, s, ~] = epoch.response(obj.amplifier);
                 indices = util.Signal.getIndicesByThreshold(data, obj.threshold, sign(obj.threshold));
+                obj.indices(num2str(id)) = indices;
             end
             %fprintf('intensity [%d] no of repeats [%d]', epoch.getParameter('numberOfIntensities'), epoch.getParameter('numberOfRepeats'));
+        end
+        
+        function clearIndices(obj)
+            obj.indices = containers.Map;
         end
     end
     

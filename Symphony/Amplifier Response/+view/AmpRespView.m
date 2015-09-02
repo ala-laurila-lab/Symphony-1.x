@@ -56,7 +56,7 @@ classdef AmpRespView < handle
         
         function renderGraph(obj)
             drawnow
-            interactive_move
+            %interactive_move
             hold(obj.graph, 'off');
         end
         

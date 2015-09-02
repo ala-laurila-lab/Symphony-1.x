@@ -1,0 +1,21 @@
+function [] = displayAttributeMap(M)
+
+allKeys = M.keys;
+L = length(allKeys);
+keyLen = zeros(1,L);
+for i=1:L
+    keyLen(i) = length(allKeys{i});
+end
+maxLen = max(keyLen);
+
+disp(sprintf('\n'));
+for i=1:L    
+    whiteSpace = 5 + maxLen - keyLen(i);    
+    val = M(allKeys{i});
+    if ~iscell(val)
+        disp([allKeys{i} ':' repmat(' ', 1, whiteSpace) num2str(val)]);
+    else
+        disp([allKeys{i} ':' repmat(' ', 1, whiteSpace) sprintf('''%s'' ',val{:})]);
+    end
+end
+disp(sprintf('\n'));
