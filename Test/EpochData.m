@@ -3,6 +3,7 @@ classdef EpochData < handle
     properties
         attributes %map for attributes from data file
         parentCell %parent cell
+        RAW_DATA_FOLDER = '.\Test\data';
     end
     
     properties (Hidden)
@@ -85,67 +86,9 @@ classdef EpochData < handle
             end
         end
         
-        function detectSpikes(obj, params, streamName)
-            if nargin < 3
-                streamName = 'Amplifier_Ch1';
-            end
-            data = obj.getData(streamName);
-            
-            cellAttached = false;
-            if strcmp(streamName, 'Amplifier_Ch1')
-                if strcmp(obj.get('ampMode'), 'Cell attached')
-                    cellAttached = true;
-                end
-            elseif strcmp(streamName, 'Amplifier_Ch2')
-                if strcmp(obj.get('amp2Mode'), 'Cell attached')
-                    cellAttached = true;
-                end
-            else
-                disp(['Error in detectSpikes: unknown stream name ' streamName]);
-            end
-            
-            if cellAttached
-                %getSpikes
-                if strcmp(params.spikeDetectorMode, 'Simple threshold')
-                    data = data - mean(data);
-                    sp = getThresCross(data,params.spikeThreshold,sign(params.spikeThreshold));
-                else
-                    sampleRate = obj.get('sampleRate');
-                    spikeResults = SpikeDetector_simple(data, 1./sampleRate, obj.spikeThreshold);
-                    sp = spikeResults.sp;
-                end
-                
-                
-                if strcmp(streamName, 'Amplifier_Ch1')
-                    obj.attributes('spikes_ch1') = sp;
-                else
-                    obj.attributes('spikes_ch2') = sp;
-                end
-            end
-        end
-        
-        function [spikeTimes, timeAxis] = getSpikes(obj, streamName)
-            if nargin < 2
-                streamName = 'Amplifier_Ch1';
-            end
-            spikeTimes = nan;
-            if strcmp(streamName, 'Amplifier_Ch1')
-                spikeTimes = obj.get('spikes_ch1');
-            elseif strcmp(streamName, 'Amplifier_Ch2')
-                spikeTimes = obj.get('spikes_ch2');
-            end
-            
-            sampleRate = obj.get('sampleRate');
-            dataPoints = length(obj.getData(streamName));
-            stimStart = obj.get('preTime')*1E-3; %s
-            if isnan(stimStart)
-                stimStart = 0;
-            end
-            timeAxis = (0:1/sampleRate:dataPoints/sampleRate) - stimStart;
-        end
         
         function [data, sampleRate, units] = getData(obj, streamName)
-            RAW_DATA_FOLDER = 'D:\git-repo\SymphonyDAS_PAL\Test\data';
+            
             if nargin < 2
                 streamName = 'Amplifier_Ch1';
             end
@@ -155,7 +98,7 @@ classdef EpochData < handle
                 sampleRate = [];
                 units = '';
             else
-                temp = h5read(fullfile(RAW_DATA_FOLDER, [obj.parentCell.savedFileName '.h5']),obj.dataLinks(streamName));
+                temp = h5read(fullfile(obj.RAW_DATA_FOLDER, [obj.parentCell.savedFileName '.h5']),obj.dataLinks(streamName));
                 data = temp.quantity;
                 units = deblank(temp.unit(:,1)');
                 sampleRate = obj.get('sampleRate');
