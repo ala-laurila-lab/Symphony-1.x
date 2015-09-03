@@ -29,6 +29,7 @@ classdef SpikeDetector < handle
         function [indices, s] = detect(obj, epoch, id)
             if obj.isvalid
                 [data, s, ~] = epoch.response(obj.amplifier);
+                data = data - mean(data);
                 indices = util.Signal.getIndicesByThreshold(data, obj.threshold, sign(obj.threshold));
                 obj.indices(num2str(id)) = indices;
             end
