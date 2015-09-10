@@ -44,10 +44,10 @@ classdef AmpRespModel < handle
             props = obj.plots.(channel).props;
         end
         
-        function [x, y] = getSpike(obj, channel, epoch)
-            x = []; y = [];
-            
+        function [x, y, threshold] = getSpike(obj, channel, epoch)
+            x = []; y = []; 
             spd = obj.plots.(channel).SpikeDetector;
+            threshold = spd.threshold;
             if spd.enabled
                 [x ,y] = getReponse(obj, channel, epoch);
                 [indices, s] = spd.detect(epoch, obj.epochId);
@@ -117,10 +117,10 @@ classdef AmpRespModel < handle
             changed = ~ notChanged;
         end
         
-        function reset(obj)
+        function reset(obj, params)
             obj.epochId = 0;
             obj.lastProtocol = [];
-            cellfun(@(ch) obj.plots.(ch).SpikeDetector.clearIndices, obj.channels);
+            cellfun(@(ch) obj.plots.(ch).SpikeDetector.reset(params), obj.channels);
         end
     end
     

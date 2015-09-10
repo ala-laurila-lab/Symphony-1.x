@@ -290,7 +290,7 @@ classdef CellData < handle
                 varargout{1} = spCount_smth;
             end
         end
-        
+            
         function plotSpikeRaster(obj, epochInd, streamName)
             if nargin < 3
                 streamName = 'Amplifier_Ch1';

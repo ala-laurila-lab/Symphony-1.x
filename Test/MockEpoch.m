@@ -11,12 +11,15 @@ classdef MockEpoch < handle
     methods
         function obj = MockEpoch
             temp = load('cellData.mat');
-            obj.data = temp.data;
+            obj.data = temp.c;
         end
         
         function [r, s, t] = response(obj, ch)
             [r, s, t] = obj.data.epochs(obj.index).getData;
-            obj.index = obj.index + 1;
+        end
+        
+        function nextIndex(obj)
+            obj.index = obj.index + 1;        
         end
         
         function p = get.parameters(obj)

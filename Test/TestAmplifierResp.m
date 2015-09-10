@@ -34,6 +34,7 @@ classdef TestAmplifierResp  < handle
         
          function handleEpoch(obj, epoch)
             obj.presenter.plotGraph(epoch);
+            epoch.nextIndex;
         end 
     end
 end

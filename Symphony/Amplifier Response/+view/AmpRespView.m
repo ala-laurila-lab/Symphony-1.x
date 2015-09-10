@@ -65,9 +65,10 @@ classdef AmpRespView < handle
             hold(obj.graph, 'on');
         end
         
-        function plotSpike(obj, x , y, props)
+        function plotSpike(obj, x , y, threshold, props)
             plot(obj.graph, x, y, props('style'));
             hold(obj.graph, 'on');
+            refline(obj.graph, [0 threshold]);
         end
     end
     

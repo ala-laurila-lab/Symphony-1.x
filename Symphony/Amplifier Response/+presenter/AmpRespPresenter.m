@@ -68,7 +68,7 @@ classdef AmpRespPresenter < handle
         function plotGraph(obj, epoch)
             m = obj.ampRespModel;
             if m.isProtocolChanged(epoch)
-                m.reset;
+                m.reset(epoch.parameters);
             end
             v = obj.ampRespView;
             chs = m.getActiveChannels;
@@ -76,8 +76,8 @@ classdef AmpRespPresenter < handle
             for i = 1:length(chs)
                 [x, y, props] = m.getReponse(chs{i}, epoch);
                 v.plotEpoch(x, y, props);
-                [x, y] = m.getSpike(chs{i}, epoch);
-                v.plotSpike(x, y, props);
+                [x, y, threshold] = m.getSpike(chs{i}, epoch);
+                v.plotSpike(x, y, threshold, props);
             end
             v.resetGraph;
             v.renderGraph;
