@@ -4,23 +4,19 @@ classdef AmpRespPresenter < handle
     
     properties
         ampRespView
+        spikeView
+        
         ampRespModel
         listeners
-        plotRepo
-        genericTO;
         app;
-    end
-    
-    properties(Constant)
-        SPIKE_STATS_FOLDER = 'Plots';
     end
     
     methods
         
-        function obj = AmpRespPresenter(model, view)
-            obj.ampRespModel = model;
-            obj.ampRespView = view;
-            obj.plotRepo = util.PlotRepository(obj.SPIKE_STATS_FOLDER);
+        function obj = AmpRespPresenter(m, v)
+            obj.ampRespModel = m;
+            obj.ampRespView = v;
+            obj.spikeView = view.SpikeStatisticsView;
         end
         
         function init(obj)
@@ -29,9 +25,7 @@ classdef AmpRespPresenter < handle
             addlistener(v, 'startSpikeDetection', @obj.startSpikeDetection);
             addlistener(v, 'stopSpikeDetection', @obj.stopSpikeDetection);
             addlistener(v, 'setThreshold', @obj.setThreshold);
-            obj.genericTO = transferObject.GenericTO;
-            obj.genericTO.persistant.spd = obj.ampRespModel.getSpikeDetectorContainer;
-            obj.plotRepo.addlistener(v, 'plotSpikeStats');
+            addlistener(v, 'psthResponse', @obj.showPSTHResponse);
         end
         
         function updateAmplifiers(obj, ~, eventData)
@@ -68,21 +62,31 @@ classdef AmpRespPresenter < handle
         function plotGraph(obj, epoch)
             m = obj.ampRespModel;
             if m.isProtocolChanged(epoch)
-                m.reset(epoch.parameters);
+                m.reset(epoch);
+                %TODO alert user for change of psth response
+                obj.showPSTHResponse;
             end
             v = obj.ampRespView;
             chs = m.getActiveChannels;
-           
+            
             for i = 1:length(chs)
                 [x, y, props] = m.getReponse(chs{i}, epoch);
                 v.plotEpoch(x, y, props);
-                [x, y, threshold] = m.getSpike(chs{i}, epoch);
-                v.plotSpike(x, y, threshold, props);
+                [x1, y1, threshold] = m.getSpike(chs{i}, epoch);
+                v.refline(x, threshold);
+                v.plotSpike(x1, y1, props);
             end
             v.resetGraph;
             v.renderGraph;
-            obj.genericTO.transient.epoch = epoch;
-            notify(v, 'plotSpikeStats', util.EventData('obj', obj.genericTO));
+        end
+        
+        function showPSTHResponse(obj, ~, ~)
+            v = obj.ampRespView;
+            status = get(v.psthResponseChkBox, 'Value');
+            m = obj.ampRespModel;
+            v = obj.spikeView;
+            p = presenter.SpikeStatisticsPresenter(v, m.getSpikeStatisticsMap);
+            p.show(status);
         end
         
         function destroy(obj)

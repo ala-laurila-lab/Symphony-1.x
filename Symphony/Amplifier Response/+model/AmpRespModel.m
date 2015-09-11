@@ -33,7 +33,7 @@ classdef AmpRespModel < handle
                 ch = channels{i};
                 values = {false, obj.colorSet{i}, 0, 1, 'b*'};
                 obj.plots.(ch).props = containers.Map(obj.plotKeys, values);
-                obj.plots.(ch).SpikeDetector = model.SpikeDetector(ch);
+                obj.plots.(ch).statistics = model.SpikeStatisticsModel(ch);
             end
         end
         
@@ -46,7 +46,7 @@ classdef AmpRespModel < handle
         
         function [x, y, threshold] = getSpike(obj, channel, epoch)
             x = []; y = []; 
-            spd = obj.plots.(channel).SpikeDetector;
+            spd = obj.plots.(channel).statistics;
             threshold = spd.threshold;
             if spd.enabled
                 [x ,y] = getReponse(obj, channel, epoch);
@@ -80,20 +80,20 @@ classdef AmpRespModel < handle
         end
         
         function setThreshold(obj, channel, thresholdTxt)
-            spd = obj.plots.(channel).SpikeDetector;
+            spd = obj.plots.(channel).statistics;
             spd.threshold = thresholdTxt;
         end
         
         function setSpikeDetector(obj, channel, state)
-            spd = obj.plots.(channel).SpikeDetector;
+            spd = obj.plots.(channel).statistics;
             spd.enabled = state;
         end
         
-        function map = getSpikeDetectorContainer(obj)
+        function map = getSpikeStatisticsMap(obj)
             chs = obj.channels;
             spd = cell(1,length(chs));
             for i = 1:length(chs)
-                spd{i} = obj.plots.(chs{i}).SpikeDetector;
+                spd{i} = obj.plots.(chs{i}).statistics;
             end
             map = containers.Map(chs, spd);
         end
@@ -117,10 +117,10 @@ classdef AmpRespModel < handle
             changed = ~ notChanged;
         end
         
-        function reset(obj, params)
+        function reset(obj, epoch)
             obj.epochId = 0;
             obj.lastProtocol = [];
-            cellfun(@(ch) obj.plots.(ch).SpikeDetector.reset(params), obj.channels);
+            cellfun(@(ch) obj.plots.(ch).statistics.reset(epoch), obj.channels);
         end
     end
     

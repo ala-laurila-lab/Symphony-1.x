@@ -10,6 +10,7 @@ classdef AmpRespView < handle
         thresholdTxt
         spikeDetectionEnabled
         spikeDetectionDisabled
+        psthResponseChkBox
     end
     
     events
@@ -17,7 +18,7 @@ classdef AmpRespView < handle
         startSpikeDetection
         stopSpikeDetection
         setThreshold
-        plotSpikeStats
+        psthResponse
     end
     
     methods
@@ -65,10 +66,16 @@ classdef AmpRespView < handle
             hold(obj.graph, 'on');
         end
         
-        function plotSpike(obj, x , y, threshold, props)
+        function plotSpike(obj, x , y, props)
             plot(obj.graph, x, y, props('style'));
             hold(obj.graph, 'on');
-            refline(obj.graph, [0 threshold]);
+            
+        end
+        
+        function refline(obj, x, threshold)
+            y_threshold = threshold * ones(1, length(x));
+            plot(obj.graph, x, y_threshold, 'color', 'blue');
+            hold(obj.graph, 'on');
         end
     end
     
@@ -92,8 +99,19 @@ classdef AmpRespView < handle
             spikeDetecttionLayout  = uiextras.VBox(....
                 'Parent', controlsLayout);
             obj.createSpikeDetectorView(spikeDetecttionLabel, spikeDetecttionLayout);
+            otherPlotsLayout = uiextras.Grid(...
+                'Parent', controlsLayout,...
+                'Padding', 5,...
+                'Spacing', 5);
+            obj.psthResponseChkBox = uicontrol(...,
+                'Parent', otherPlotsLayout,...
+                'Style','checkbox',...
+                'String','PSTH Response',...
+                'Value',0,...
+                'callback',@(h, d)notify(obj, 'psthResponse'));
             
-            set(controlsLayout, 'Sizes', [100 100 100]);
+       
+            set(controlsLayout, 'Sizes', [100 100 100 -1]);
         end
         
         function createCheckbox(obj, layout, channels)

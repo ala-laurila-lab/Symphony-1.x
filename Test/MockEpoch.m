@@ -11,7 +11,7 @@ classdef MockEpoch < handle
     methods
         function obj = MockEpoch
             temp = load('cellData.mat');
-            obj.data = temp.c;
+            obj.data = temp.data;
         end
         
         function [r, s, t] = response(obj, ch)

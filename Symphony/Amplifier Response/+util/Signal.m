@@ -6,7 +6,7 @@ classdef Signal
     end
     
     methods(Static)
-         function Ind = getIndicesByThreshold(data, threshold, direction, varargin)
+        function Ind = getIndicesByThreshold(data, threshold, direction, varargin)
             %direction 1 = up, -1 = down
             if nargin > 3
                 ubd = varargin{1};
