@@ -1,4 +1,4 @@
-classdef SpikeStatisticsView < handle
+classdef PsthRespView < handle
     %SPIKEDETECTORVIEW Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -14,10 +14,11 @@ classdef SpikeStatisticsView < handle
     
     events
         selectIntensity
+        psthResponse
     end
     
     methods
-        function obj = SpikeStatisticsView
+        function obj = PsthRespView
             createUi(obj);
         end
         
@@ -43,7 +44,7 @@ classdef SpikeStatisticsView < handle
                 'Parent', layout,...
                 'BackgroundColor', 'black',...
                 'Padding', 1,...
-                'Spacing', 1)
+                'Spacing', 1);
             set(layout, 'Sizes', [100 -1]);
         end
         
@@ -87,10 +88,11 @@ classdef SpikeStatisticsView < handle
             set(axes, 'Color', 'black');
         end
         
-        function plotPSTH(channel, x, y)
+        function plotPSTH(obj, channel, x, y)
             axes = obj.graph.(channel);
-            axes.plot(x, y);
-            obj.restGraph(axes);
+            plot(axes, x, y);
+            obj.resetGraph(axes);
+            hold on;
         end
     end
 end

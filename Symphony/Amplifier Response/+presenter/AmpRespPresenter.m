@@ -4,11 +4,10 @@ classdef AmpRespPresenter < handle
     
     properties
         ampRespView
-        spikeView
+        psthRespView
         
         ampRespModel
         listeners
-        app;
     end
     
     methods
@@ -16,7 +15,8 @@ classdef AmpRespPresenter < handle
         function obj = AmpRespPresenter(m, v)
             obj.ampRespModel = m;
             obj.ampRespView = v;
-            obj.spikeView = view.SpikeStatisticsView;
+            %MVPQ Is nested view allowed in mvp pattern
+            obj.psthRespView = view.PsthRespView;
         end
         
         function init(obj)
@@ -75,6 +75,7 @@ classdef AmpRespPresenter < handle
                 [x1, y1, threshold] = m.getSpike(chs{i}, epoch);
                 v.refline(x, threshold);
                 v.plotSpike(x1, y1, props);
+                notify(obj.psthRespView, 'psthResponse', util.EventData('channel', chs{i}));
             end
             v.resetGraph;
             v.renderGraph;
@@ -83,9 +84,10 @@ classdef AmpRespPresenter < handle
         function showPSTHResponse(obj, ~, ~)
             v = obj.ampRespView;
             status = get(v.psthResponseChkBox, 'Value');
-            m = obj.ampRespModel;
-            v = obj.spikeView;
-            p = presenter.SpikeStatisticsPresenter(v, m.getSpikeStatisticsMap);
+            app = obj.ampRespModel.getSpikeStatisticsMap;
+            v = obj.psthRespView;
+            m = model.PsthRespModel;
+            p = presenter.PsthRespPresenter(v, m, app);
             p.show(status);
         end
         

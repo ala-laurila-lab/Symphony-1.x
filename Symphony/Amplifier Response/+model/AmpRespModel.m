@@ -4,11 +4,12 @@ classdef AmpRespModel < handle
     
     properties
         channels
-        plots
-        plotKeys = {'active', 'color', 'shift', 'scale', 'style'}
-        colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
+        serviceContext
         epochId = 0
         lastProtocol
+        %TODO Refactor following constants to enum if posssible
+        plotKeys = {'active', 'color', 'shift', 'scale', 'style'}
+        colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
         parameterSchema = {...,
             'initialPulseAmplitude',...
             'scalingFactor',...
@@ -26,14 +27,14 @@ classdef AmpRespModel < handle
     methods
         
         function obj = AmpRespModel(channels)
-            obj.plots = struct();
+            obj.serviceContext = struct();
             obj.channels = channels;
             
             for i = 1:length(channels)
                 ch = channels{i};
                 values = {false, obj.colorSet{i}, 0, 1, 'b*'};
-                obj.plots.(ch).props = containers.Map(obj.plotKeys, values);
-                obj.plots.(ch).statistics = model.SpikeStatisticsModel(ch);
+                obj.serviceContext.(ch).props = containers.Map(obj.plotKeys, values);
+                obj.serviceContext.(ch).statistics = service.SpikeStatistics(ch);
             end
         end
         
@@ -41,12 +42,12 @@ classdef AmpRespModel < handle
             [r, s, ~] = epoch.response(channel);
             x = (1:numel(r))/s;
             y = obj.changeOffSet(r, channel);
-            props = obj.plots.(channel).props;
+            props = obj.serviceContext.(channel).props;
         end
         
         function [x, y, threshold] = getSpike(obj, channel, epoch)
-            x = []; y = []; 
-            spd = obj.plots.(channel).statistics;
+            x = []; y = [];
+            spd = obj.serviceContext.(channel).statistics;
             threshold = spd.threshold;
             if spd.enabled
                 [x ,y] = getReponse(obj, channel, epoch);
@@ -57,13 +58,13 @@ classdef AmpRespModel < handle
         end
         
         function x = changeOffSet(obj, x, ch)
-            scale = obj.plots.(ch).props('scale');
-            shift = obj.plots.(ch).props('shift');
+            scale = obj.serviceContext.(ch).props('scale');
+            shift = obj.serviceContext.(ch).props('shift');
             x = x * scale + shift;
         end
         
         function set(obj, channel, key, value)
-            obj.plots.(channel).props(key) = value;
+            obj.serviceContext.(channel).props(key) = value;
         end
         
         function activeChannels = getActiveChannels(obj)
@@ -72,7 +73,7 @@ classdef AmpRespModel < handle
             idx = 1;
             
             for i =1:length(chs)
-                if obj.plots.(chs{i}).props('active') == 1
+                if obj.serviceContext.(chs{i}).props('active') == 1
                     activeChannels{idx} = chs{i};
                     idx = idx + 1;
                 end
@@ -80,22 +81,22 @@ classdef AmpRespModel < handle
         end
         
         function setThreshold(obj, channel, thresholdTxt)
-            spd = obj.plots.(channel).statistics;
+            spd = obj.serviceContext.(channel).statistics;
             spd.threshold = thresholdTxt;
         end
         
         function setSpikeDetector(obj, channel, state)
-            spd = obj.plots.(channel).statistics;
+            spd = obj.serviceContext.(channel).statistics;
             spd.enabled = state;
         end
         
         function map = getSpikeStatisticsMap(obj)
             chs = obj.channels;
-            spd = cell(1,length(chs));
+            s = cell(1,length(chs));
             for i = 1:length(chs)
-                spd{i} = obj.plots.(chs{i}).statistics;
+                s{i} = obj.serviceContext.(chs{i}).statistics;
             end
-            map = containers.Map(chs, spd);
+            map = containers.Map(chs, s);
         end
         
         %TODO refactor this piece code for better understanding and
@@ -120,7 +121,7 @@ classdef AmpRespModel < handle
         function reset(obj, epoch)
             obj.epochId = 0;
             obj.lastProtocol = [];
-            cellfun(@(ch) obj.plots.(ch).statistics.reset(epoch), obj.channels);
+            cellfun(@(ch) obj.serviceContext.(ch).statistics.reset(epoch), obj.channels);
         end
     end
     

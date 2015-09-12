@@ -1,4 +1,4 @@
-classdef SpikeStatisticsModel < handle
+classdef SpikeStatistics < handle
     %SPIKEDETECTOR Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -29,7 +29,7 @@ classdef SpikeStatisticsModel < handle
     
     methods
         
-        function obj = SpikeStatisticsModel(amplifier)
+        function obj = SpikeStatistics(amplifier)
             obj.threshold = 0;
             obj.amplifier = amplifier;
             obj.indices = containers.Map;
