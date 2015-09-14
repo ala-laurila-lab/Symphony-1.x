@@ -85,10 +85,13 @@ classdef AmpRespPresenter < handle
             v = obj.ampRespView;
             status = get(v.psthResponseChkBox, 'Value');
             app = obj.ampRespModel.getSpikeStatisticsMap;
-            v = obj.psthRespView;
-            m = model.PsthRespModel;
-            p = presenter.PsthRespPresenter(v, m, app);
-            p.show(status);
+            %TODO alert user if status is active and app is empty
+            if ~isempty(app)
+                v = obj.psthRespView;
+                m = model.PsthRespModel;
+                p = presenter.PsthRespPresenter(v, m, app);
+                p.show(status);
+            end
         end
         
         function destroy(obj)

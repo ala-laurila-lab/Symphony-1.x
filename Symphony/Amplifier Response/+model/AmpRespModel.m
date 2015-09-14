@@ -91,7 +91,7 @@ classdef AmpRespModel < handle
         end
         
         function map = getSpikeStatisticsMap(obj)
-            chs = obj.channels;
+            chs = obj.getActiveChannels;
             s = cell(1,length(chs));
             for i = 1:length(chs)
                 s{i} = obj.serviceContext.(chs{i}).statistics;

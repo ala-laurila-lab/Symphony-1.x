@@ -16,18 +16,18 @@ classdef PsthRespPresenter < handle
         end
         
         function show(obj, status)
-            obj.bind;
-            v = obj.psthRespView;
-            m = obj.psthRespModel;
             channels = obj.app.keys;
             statistics = obj.app(channels{1});
+            obj.bind;
             
             if statistics.enabled
+                v = obj.psthRespView;
+                m = obj.psthRespModel;
                 voltages = statistics.intensitiesToVoltages;
                 m.intensityIndex = zeros(1, length(voltages));
-                v.showIntensity(voltages);
+                v.clear;
+                v.show(status, voltages, channels);
             end
-            v.show(status, channels);
         end
         
         function bind(obj)
@@ -42,13 +42,14 @@ classdef PsthRespPresenter < handle
         end
         
         function showAllPSTH(obj, ~, ~)
-             channels = obj.app.keys;
-             cellfun(@(channel) obj.showPSTH(channel), channels)
+            channels = obj.app.keys;
+            cellfun(@(channel) obj.showPSTH(channel), channels);
+            obj.psthRespView.renderGraph;
         end
         
         function showPSTH(obj, channel)
-             m = obj.psthRespModel;
-             v = obj.psthRespView;
+            m = obj.psthRespModel;
+            v = obj.psthRespView;
             indices = m.intensityIndex;
             indices = indices(indices == 1);
             

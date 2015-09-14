@@ -5,6 +5,7 @@ classdef PsthRespView < handle
     properties
         figureHandle
         graph
+        intensityChkBox
     end
     
     properties(Access = private)
@@ -48,19 +49,29 @@ classdef PsthRespView < handle
             set(layout, 'Sizes', [100 -1]);
         end
         
-        function show(obj, status, channels)
+        function show(obj, status, intensities, channels)
             if status
                 set(obj.figureHandle, 'Visible', 'on');
             else
                 set(obj.figureHandle, 'Visible', 'off');
             end
-            displayGraph(obj, channels);
+            obj.showIntensity(intensities)
+            obj.displayGraph(channels);
+        end
+        
+        function clear(obj)
+            if ~isempty(obj.intensityChkBox) && ~isempty(obj.graph)
+                cellfun(@(chkBox) delete(chkBox), obj.intensityChkBox);
+                structfun(@(axes) delete(axes), obj.graph);
+            end
         end
         
         function showIntensity(obj, intensities)
+            n = length(intensities);
+            obj.intensityChkBox = cell(1, n);
             
-            for i = 1:length(intensities)
-                uicontrol(...,
+            for i = 1:n
+                obj.intensityChkBox{i} = uicontrol(...,
                     'Parent', obj.intensityLayout,...
                     'Style','checkbox',...
                     'String',sprintf('%d mv',intensities(i)),...
@@ -86,6 +97,12 @@ classdef PsthRespView < handle
             set(axes, 'XColor', 'White');
             set(axes, 'YColor', 'White');
             set(axes, 'Color', 'black');
+        end
+
+        function renderGraph(obj)
+            drawnow
+            %interactive_move
+            structfun(@(axes) hold(axes, 'off'), obj.graph);
         end
         
         function plotPSTH(obj, channel, x, y)
