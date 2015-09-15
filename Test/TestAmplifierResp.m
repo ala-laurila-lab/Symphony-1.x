@@ -35,7 +35,15 @@ classdef TestAmplifierResp  < handle
          function handleEpoch(obj, epoch)
             obj.presenter.plotGraph(epoch);
             epoch.nextIndex;
-        end 
+         end
+        
+         function run(obj, n)
+             e = MockEpoch;
+             
+             for i = 1:n 
+                 obj.handleEpoch(e);pause(1); 
+             end
+         end
     end
 end
 

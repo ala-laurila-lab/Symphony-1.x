@@ -8,10 +8,22 @@ classdef MockEpoch < handle
         parameters
     end
     
+    properties
+        REMOTE_PATH = '/archive/ala-laurila_lab/data/takeshd1'
+        LOCAL_PATH = './Test/data/'
+        FILE = '061915Ac4.h5'
+        HOSTNAME = 'amor.becs.hut.fi'
+        USERNAME = 'narayas2'
+        PASSWORD = 'sowmya@1989'
+    end
+    
     methods
         function obj = MockEpoch
+           if ~exist(fullfile(obj.LOCAL_PATH, obj.FILE) , 'file')
+               obj.download; 
+           end
             temp = load('cellData.mat');
-            obj.data = temp.c;
+            obj.data = temp.data;
         end
         
         function [r, s, t] = response(obj, ch)
@@ -29,6 +41,14 @@ classdef MockEpoch < handle
             for i = 1:length(k)
                 p.(k{i}) = map(k{i});
             end
+        end
+        
+        function download(obj)
+            con = ssh2_config(obj.HOSTNAME, obj.USERNAME, obj.PASSWORD);
+            disp('connected to amor .. Downloading file..');
+            con = scp_get(con, {obj.FILE}, obj.LOCAL_PATH , obj.REMOTE_PATH);
+            disp('Download complete !');
+            ssh2_close(con);
         end
     end
 end
