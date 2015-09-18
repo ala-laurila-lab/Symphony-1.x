@@ -1,4 +1,9 @@
 
 Project work:
-  ☐ Spike statisctics test case
+  Desc : Epoch index from 21 till 271
+  Questions ? Why the base line of signals keep on changing.
+  ✔ Spike statisctics test case (except PSTH) @done (15-09-18 16:54)
+  ☐ PSTH test case 
   ☐ PSTH Response plot with smoothing window enabled
+  ☐ Implement horizontal shift and scale 
+

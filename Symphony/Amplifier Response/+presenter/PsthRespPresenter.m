@@ -26,7 +26,7 @@ classdef PsthRespPresenter < handle
                 voltages = statistics.intensitiesToVoltages;
                 m.intensityIndex = zeros(1, length(voltages));
                 v.clear;
-                v.show(status, voltages, channels);
+                v.show(status, voltages, channels, m.colorset);
             end
         end
         
@@ -51,13 +51,13 @@ classdef PsthRespPresenter < handle
             m = obj.psthRespModel;
             v = obj.psthRespView;
             indices = m.intensityIndex;
-            indices = indices(indices == 1);
+            indices = find(indices == 1);
             
             for i = 1:length(indices)
                 statistics = obj.app(channel);
                 if statistics.enabled
                     [x, y] = statistics.getPSTH(indices(i));
-                    v.plotPSTH(channel, x, y);
+                    v.plotPSTH(channel, x, y, m.colorset{i});
                 end
             end
         end

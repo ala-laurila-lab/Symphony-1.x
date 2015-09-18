@@ -49,13 +49,13 @@ classdef PsthRespView < handle
             set(layout, 'Sizes', [100 -1]);
         end
         
-        function show(obj, status, intensities, channels)
+        function show(obj, status, intensities, channels, legend)
             if status
                 set(obj.figureHandle, 'Visible', 'on');
             else
                 set(obj.figureHandle, 'Visible', 'off');
             end
-            obj.showIntensity(intensities)
+            obj.showIntensity(intensities, legend)
             obj.displayGraph(channels);
         end
         
@@ -66,7 +66,7 @@ classdef PsthRespView < handle
             end
         end
         
-        function showIntensity(obj, intensities)
+        function showIntensity(obj, intensities, legend)
             n = length(intensities);
             obj.intensityChkBox = cell(1, n);
             
@@ -74,7 +74,7 @@ classdef PsthRespView < handle
                 obj.intensityChkBox{i} = uicontrol(...,
                     'Parent', obj.intensityLayout,...
                     'Style','checkbox',...
-                    'String',sprintf('%d mv',intensities(i)),...
+                    'String',sprintf('%d mv (%s)',intensities(i), legend{i}),...
                     'Value',0,...
                     'callback',@(h, d)notify(obj, 'selectIntensity', util.EventData(i, get(h, 'Value'))));
             end
@@ -105,9 +105,9 @@ classdef PsthRespView < handle
             structfun(@(axes) hold(axes, 'off'), obj.graph);
         end
         
-        function plotPSTH(obj, channel, x, y)
+        function plotPSTH(obj, channel, x, y, color)
             axes = obj.graph.(channel);
-            plot(axes, x, y);
+            plot(axes, x, y, 'color', color);
             obj.resetGraph(axes);
             hold on;
         end

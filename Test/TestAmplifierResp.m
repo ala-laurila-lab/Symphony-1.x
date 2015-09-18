@@ -39,7 +39,7 @@ classdef TestAmplifierResp  < handle
         
          function run(obj, n)
              e = MockEpoch;
-             
+             e.index = 21;
              for i = 1:n 
                  obj.handleEpoch(e);pause(1); 
              end
