@@ -1,4 +1,4 @@
-classdef TestAmplifierResp  < handle
+classdef TestAmpRespView  < handle
     %AMPLIFIERRESPONSEVIEW Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -16,7 +16,7 @@ classdef TestAmplifierResp  < handle
     
     methods
         
-        function obj = TestAmplifierResp()
+        function obj = TestAmpRespView()
             obj.figureHandle = figure( ...
                 'Name', 'Graphical Amplifier Response', ...
                 'MenuBar', 'none', ...
@@ -33,8 +33,12 @@ classdef TestAmplifierResp  < handle
         end
         
          function handleEpoch(obj, epoch)
-            obj.presenter.plotGraph(epoch);
+            try
+             obj.presenter.plotGraph(epoch);
             epoch.nextIndex;
+            catch
+                disp('[Amplifier response] something wrong happend ..')
+            end
          end
         
          function run(obj, n)

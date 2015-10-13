@@ -3,7 +3,7 @@ Project work:
   Desc : Epoch index from 21 till 271
   Questions ? Why the base line of signals keep on changing.
   ✔ Spike statisctics test case (except PSTH) @done (15-09-18 16:54)
-  ☐ PSTH test case 
-  ☐ PSTH Response plot with smoothing window enabled
+  ✔ PSTH test case  @done (15-10-13 16:03)
+  ✔ PSTH Response plot with smoothing window enabled @done (15-10-13 16:03)
   ☐ Implement horizontal shift and scale 
 

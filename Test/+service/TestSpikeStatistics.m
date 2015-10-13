@@ -49,23 +49,47 @@ classdef TestSpikeStatistics < matlab.unittest.TestCase
             s = obj.spikeStatisctics;
             s.threshold = 40;
             expected = 5;
-            obj.verifyEqual(length(s.detect(obj.epoch, 1)), expected);
+            id =  obj.epoch.index;
+            obj.verifyEqual(length(s.detect(obj.epoch, id)), expected);
         end
         
         function getSpikeIndices(obj)
             s = obj.spikeStatisctics;
             s.threshold = 40;
-            for i = 1:10
+            start = obj.epoch.index;
+            n = start + 10;
+            for i = start:n
                 s.detect(obj.epoch, i);
                 obj.epoch.nextIndex;
             end
-            expected = [5, 9, 12, 14, 7];
+            expected = [6, 9, 12, 14, 7];
             actual = ones(1,5);
             for i = 1:5
                 r = s.getSpikeIndices(i);
                 actual(i) = length(r.spikes);
             end
            obj.verifyEqual(actual, expected);
+        end
+        
+        function getPSTH(obj)
+            s = obj.spikeStatisctics;
+            s.threshold = 40;
+            start = obj.epoch.index;
+            n = start + 30;
+            expected = [-0.4999 * ones(1,5); 0.5101 * ones(1,5)];
+            for i = start:n
+                s.detect(obj.epoch, i);
+                obj.epoch.nextIndex;
+            end
+            actual = ones(2,5);
+            for i = 1:5
+              [x, ~] = s.getPSTH(i);
+              actual(1,i) = min(x);
+              actual(2,i) = max(x);
+            end
+            %validate range
+            obj.verifyEqual(actual, expected); 
+            %TODO to validate PSTHCount and smoothing window
         end
     end
 end

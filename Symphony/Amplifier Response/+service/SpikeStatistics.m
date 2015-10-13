@@ -18,6 +18,7 @@ classdef SpikeStatistics < handle
         % Metadata to optimize coding block
         epochParams
         lastEpochId
+        startEpochId
     end
     
     
@@ -34,6 +35,7 @@ classdef SpikeStatistics < handle
             obj.amplifier = amplifier;
             obj.indices = containers.Map;
             obj.lastEpochId = 0;
+            obj.startEpochId = 0;
             obj.smoothingWindow = 0;
         end
         
@@ -45,6 +47,10 @@ classdef SpikeStatistics < handle
         end
         
         function [indices, s] = detect(obj, epoch, id)
+            
+            if obj.startEpochId == 0
+                obj.startEpochId = id;
+            end
             [data, s, ~] = epoch.response(obj.amplifier);
             m = mean(data);
             data = data - m;
@@ -54,11 +60,11 @@ classdef SpikeStatistics < handle
             obj.lastEpochId = id;
         end
         
-        function [x, count] = getPSTH(obj, epochId)
+        function [x, count] = getPSTH(obj, stimulsIndex)
             sampleRate = obj.epochParams.sampleRate;
             stimStart = obj.epochParams.preTime*1E-3;
             
-            trail = obj.getSpikeIndices(epochId);
+            trail = obj.getSpikeIndices(stimulsIndex);
             spikes = trail.spikes;
             bins = 1 : obj.getSampleSizePerBin : obj.epochLength;
             count = histc(spikes, bins);
@@ -70,7 +76,7 @@ classdef SpikeStatistics < handle
             %TODO migrate the piece of code to common util for further
             %felxibility
             if obj.smoothingWindow
-                smoothingWindow_pts = round( obj.smoothingWindow / binWidth );
+                smoothingWindow_pts = round( obj.smoothingWindow / obj.BIN_WIDTH);
                 w = gausswin(smoothingWindow_pts);
                 w = w / sum(w);
                 count = conv(count, w, 'same');
@@ -86,6 +92,7 @@ classdef SpikeStatistics < handle
         function trail = getSpikeIndices(obj, id)
             spikes = [];
             columns = (id : obj.epochParams.numberOfIntensities : obj.lastEpochId);
+            columns = columns(columns >= obj.startEpochId);
             n = length(columns);
             for i = 1:n
                 spikes = [spikes, obj.indices(num2str(columns(i)))'];
