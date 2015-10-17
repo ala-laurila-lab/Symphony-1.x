@@ -43,6 +43,21 @@ classdef MockEpoch < handle
             end
         end
         
+        function s = toStruct(obj, i)
+            s = obj.parameters;
+            [r, ~, ~] = obj.data.epochs(i).getData;
+            s.response = r';
+        end
+        
+        %save('data.json', e.hdf5toJson(1,10), '-ascii');
+        function data = hdf5toJson(obj, start, n)
+            responses = [];
+            for i = start:n
+                responses = [obj.toStruct(i), responses];
+            end
+            data = savejson('data',responses);
+        end
+        
         function download(obj)
             con = ssh2_config(obj.HOSTNAME, obj.USERNAME, obj.PASSWORD);
             disp('connected to amor .. Downloading file..');

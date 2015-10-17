@@ -34,11 +34,18 @@ classdef PsthRespPresenter < handle
             v = obj.psthRespView;
             addlistener(v, 'selectIntensity', @obj.selectIntensity);
             addlistener(v, 'psthResponse', @obj.showAllPSTH);
+            addlistener(v, 'setSmoothingWindow', @obj.setSmoothingWindow);
+            addlistener(v, 'Close', @obj.close);
         end
         
         function selectIntensity(obj, ~, e)
             m = obj.psthRespModel;
             m.intensityIndex(e.key) = e.value;
+        end
+        
+        function setSmoothingWindow(obj, ~, e)
+            m = obj.psthRespModel;
+            m.smoothingWindow = str2double(e.value);  
         end
         
         function showAllPSTH(obj, ~, ~)
@@ -55,11 +62,17 @@ classdef PsthRespPresenter < handle
             
             for i = 1:length(indices)
                 statistics = obj.app(channel);
+                statistics.smoothingWindow = m.smoothingWindow;
                 if statistics.enabled
                     [x, y] = statistics.getPSTH(indices(i));
                     v.plotPSTH(channel, x, y, m.colorset{i});
                 end
             end
+        end
+        
+        function close(obj, ~, ~)
+            v = obj.psthRespView;
+            v.hide();
         end
     end
     
