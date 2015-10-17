@@ -28,7 +28,7 @@ classdef Multiclamp < LabRigConfiguration
                obj.addDevice('Rig_Switches_1','', 'DIGITAL_IN.1');  % input only
                obj.addDevice('Rig_Switches_2','', 'DIGITAL_IN.2');  % input only
                obj.addDevice('Rig_Switches_3','', 'DIGITAL_IN.3');  % input only
-%              obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
+               obj.addDevice('Rig_Switches_4','', 'DIGITAL_IN.4');  % input only
 %              obj.addDevice('Rig_Switches_5','', 'DIGITAL_IN.5');  % input only
 %              obj.addDevice('Rig_Switches_6','', 'DIGITAL_IN.6');  % input only
 %              obj.addDevice('Rig_Switches_7','', 'DIGITAL_IN.7');  % input only

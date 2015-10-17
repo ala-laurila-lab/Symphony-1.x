@@ -107,6 +107,10 @@ classdef LEDFactorPulse < LabProtocol
             epoch.addStimulus(obj.StimulusLED, obj.ledStimulus(obj.StimulusLED));
             epoch.addParameter('pulseAmplitude', obj.pulseAmplitude + obj.LEDBackground);%DT
             epoch.addParameter('backgroundAmplitude', obj.LEDBackground);%DT
+            
+            if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
+                epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
+            end
         end
         
         function queueEpoch(obj, epoch)
@@ -184,6 +188,23 @@ classdef LEDFactorPulse < LabProtocol
             catch
             end
         end
+        
+        function stim = ttlStimulus(obj)
+            % Construct a repeating pulse stimulus generator.
+            p = PulseGenerator();
+            
+            p.preTime = 0;
+            p.stimTime = 1;
+            p.tailTime = obj.preTime + obj.stimTime + obj.tailTime - 1;
+            p.amplitude = 1;
+            p.mean = 0;
+            p.sampleRate = obj.sampleRate;
+            p.units = Symphony.Core.Measurement.UNITLESS;
+            
+            % Generate the stimulus object.
+            stim = p.generate();
+        end
+        
         
         %% utility Functions
         function resetParameters(obj)
