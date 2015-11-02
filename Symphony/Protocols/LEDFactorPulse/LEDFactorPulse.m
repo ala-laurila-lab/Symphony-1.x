@@ -25,8 +25,8 @@ classdef LEDFactorPulse < LabProtocol
         preTime = 500
         stimTime = 500
         tailTime = 500
-        numberOfIntensities = 5
-        numberOfRepeats = 1
+        numberOfIntensities = 1
+        numberOfRepeats = 5
         interpulseInterval = 0
         interepochgrpInterval  = 0
         ampHoldSignal = 0
