@@ -26,7 +26,7 @@ classdef PsthRespPresenter < handle
                 voltages = statistics.intensitiesToVoltages;
                 m.intensityIndex = zeros(1, length(voltages));
                 v.clear;
-                v.show(status, voltages, channels);
+                v.show(status, voltages, channels, m.colorset);
             end
         end
         
@@ -34,11 +34,18 @@ classdef PsthRespPresenter < handle
             v = obj.psthRespView;
             addlistener(v, 'selectIntensity', @obj.selectIntensity);
             addlistener(v, 'psthResponse', @obj.showAllPSTH);
+            addlistener(v, 'setSmoothingWindow', @obj.setSmoothingWindow);
+            addlistener(v, 'Close', @obj.close);
         end
         
         function selectIntensity(obj, ~, e)
             m = obj.psthRespModel;
             m.intensityIndex(e.key) = e.value;
+        end
+        
+        function setSmoothingWindow(obj, ~, e)
+            m = obj.psthRespModel;
+            m.smoothingWindow = str2double(e.value);  
         end
         
         function showAllPSTH(obj, ~, ~)
@@ -51,15 +58,21 @@ classdef PsthRespPresenter < handle
             m = obj.psthRespModel;
             v = obj.psthRespView;
             indices = m.intensityIndex;
-            indices = indices(indices == 1);
+            indices = find(indices == 1);
             
             for i = 1:length(indices)
                 statistics = obj.app(channel);
+                statistics.smoothingWindow = m.smoothingWindow;
                 if statistics.enabled
                     [x, y] = statistics.getPSTH(indices(i));
-                    v.plotPSTH(channel, x, y);
+                    v.plotPSTH(channel, x, y, m.colorset{i});
                 end
             end
+        end
+        
+        function close(obj, ~, ~)
+            v = obj.psthRespView;
+            v.hide();
         end
     end
     

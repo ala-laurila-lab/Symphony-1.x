@@ -4,4 +4,5 @@ Headers/
 Source.txt
 *.mat
 *.asv
-lib/
+lib/GUI Layout Toolbox 2.1.2/
+lib/jsonlab-1.1/

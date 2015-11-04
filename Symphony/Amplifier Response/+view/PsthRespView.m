@@ -6,16 +6,21 @@ classdef PsthRespView < handle
         figureHandle
         graph
         intensityChkBox
+        configuration
+        smoothingWindowTxt
     end
     
     properties(Access = private)
         intensityLayout
         graphLayout
+        configElements
     end
     
     events
         selectIntensity
         psthResponse
+        setSmoothingWindow
+        Close
     end
     
     methods
@@ -30,13 +35,17 @@ classdef PsthRespView < handle
                 'MenuBar', 'none', ...
                 'Toolbar', 'none', ...
                 'NumberTitle', 'off',...
-                'Visible', 'off');
+                'Visible', 'off',...
+                'CloseRequestFcn', @(h,d)notify(obj, 'Close'));
             
             layout = uiextras.VBox(...
                 'Parent', obj.figureHandle,...
                 'Padding', 5,...
                 'Spacing', 5);
-            
+            obj.configuration = uiextras.HBox(...,
+                'Parent', layout,...
+                'Padding', 5,...
+                'Spacing', 5);
             obj.intensityLayout = uiextras.HBox(...,
                 'Parent', layout,...
                 'Padding', 5,...
@@ -46,16 +55,31 @@ classdef PsthRespView < handle
                 'BackgroundColor', 'black',...
                 'Padding', 1,...
                 'Spacing', 1);
-            set(layout, 'Sizes', [100 -1]);
+            set(layout, 'Sizes', [50 100 -1]);
         end
         
-        function show(obj, status, intensities, channels)
+        function show(obj, status, intensities, channels, legend)
             if status
                 set(obj.figureHandle, 'Visible', 'on');
             else
                 set(obj.figureHandle, 'Visible', 'off');
             end
-            obj.showIntensity(intensities)
+            %Configuration pannel goes here
+            obj.configElements = uiextras.HBox(...,
+                'Parent', obj.configuration,...
+                'Padding', 5,...
+                'Spacing', 5);
+            uicontrol(...,
+                'Parent', obj.configElements,...
+                'Style','text',...
+                'String','Smoothing Window');
+            obj.smoothingWindowTxt = uicontrol(...,
+                'Parent', obj.configElements,...
+                'Style','Edit',...
+                'String','00.000',...
+                'callback',@(h, d)notify(obj, 'setSmoothingWindow', util.EventData('', get(h, 'String'))));
+            
+            obj.showIntensity(intensities, legend);
             obj.displayGraph(channels);
         end
         
@@ -63,10 +87,11 @@ classdef PsthRespView < handle
             if ~isempty(obj.intensityChkBox) && ~isempty(obj.graph)
                 cellfun(@(chkBox) delete(chkBox), obj.intensityChkBox);
                 structfun(@(axes) delete(axes), obj.graph);
+                delete(obj.configElements);
             end
         end
         
-        function showIntensity(obj, intensities)
+        function showIntensity(obj, intensities, legend)
             n = length(intensities);
             obj.intensityChkBox = cell(1, n);
             
@@ -74,7 +99,7 @@ classdef PsthRespView < handle
                 obj.intensityChkBox{i} = uicontrol(...,
                     'Parent', obj.intensityLayout,...
                     'Style','checkbox',...
-                    'String',sprintf('%d mv',intensities(i)),...
+                    'String',sprintf('%d mv (%s)',intensities(i), legend{i}),...
                     'Value',0,...
                     'callback',@(h, d)notify(obj, 'selectIntensity', util.EventData(i, get(h, 'Value'))));
             end
@@ -98,18 +123,22 @@ classdef PsthRespView < handle
             set(axes, 'YColor', 'White');
             set(axes, 'Color', 'black');
         end
-
+        
         function renderGraph(obj)
             drawnow
             %interactive_move
             structfun(@(axes) hold(axes, 'off'), obj.graph);
         end
         
-        function plotPSTH(obj, channel, x, y)
+        function plotPSTH(obj, channel, x, y, color)
             axes = obj.graph.(channel);
-            plot(axes, x, y);
+            plot(axes, x, y, 'color', color);
             obj.resetGraph(axes);
             hold on;
+        end
+        
+        function hide(obj)
+            set(obj.figureHandle, 'Visible', 'off');
         end
     end
 end

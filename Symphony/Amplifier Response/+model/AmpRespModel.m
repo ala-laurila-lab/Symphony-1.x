@@ -92,11 +92,16 @@ classdef AmpRespModel < handle
         
         function map = getSpikeStatisticsMap(obj)
             chs = obj.getActiveChannels;
-            s = cell(1,length(chs));
-            for i = 1:length(chs)
+            n = length(chs);
+            s = cell(1, n);
+            map = [];
+            
+            for i = 1:n
                 s{i} = obj.serviceContext.(chs{i}).statistics;
             end
-            map = containers.Map(chs, s);
+            if n ~= 0
+                map = containers.Map(chs, s);
+            end
         end
         
         %TODO refactor this piece code for better understanding and
@@ -108,6 +113,7 @@ classdef AmpRespModel < handle
             
             if isempty(obj.lastProtocol)
                 obj.lastProtocol = epoch.parameters;
+                cellfun(@(ch) obj.serviceContext.(ch).statistics.init(epoch), obj.channels);
             else
                 old = obj.lastProtocol;
                 new = epoch.parameters;
@@ -121,7 +127,7 @@ classdef AmpRespModel < handle
         function reset(obj, epoch)
             obj.epochId = 0;
             obj.lastProtocol = [];
-            cellfun(@(ch) obj.serviceContext.(ch).statistics.reset(epoch), obj.channels);
+            cellfun(@(ch) obj.serviceContext.(ch).statistics.init(epoch), obj.channels);
         end
     end
     

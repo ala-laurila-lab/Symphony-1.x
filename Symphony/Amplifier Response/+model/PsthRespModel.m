@@ -4,6 +4,8 @@ classdef PsthRespModel < handle
     
     properties
         intensityIndex
+        colorset = {'red', 'blue', 'green', 'yellow', 'magenta', 'cyan', 'white'}
+        smoothingWindow
     end
     
     methods
