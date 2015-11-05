@@ -1,39 +1,29 @@
-classdef AmpRespModel < handle
-    %AMPRESPMODEL Summary of this class goes here
-    %   Detailed explanation goes here
+classdef GraphingService < handle
     
     properties
-        channels
+        channels % Has all the amplifer channels
+         % Service context is the dynamic structure for above channels  
+         % Field (1) (channels{i}).props; Value(1) for main graph properties refer getMainGraphProperties@GraphingConstants
+         % Filed (2) (channels{i}).statistics; Value(2) service.SpikeStatistics objcet for each channel 
         serviceContext
+    end
+    
+    properties(Access = private)
         epochId = 0
         lastProtocol
-        %TODO Refactor following constants to enum if posssible
-        plotKeys = {'active', 'color', 'shift', 'scale', 'style'}
-        colorSet = {'r', 'g', 'y', 'w', 'b', 'c'};
-        parameterSchema = {...,
-            'initialPulseAmplitude',...
-            'scalingFactor',...
-            'preTime',...
-            'stimTime',...
-            'tailTime',...
-            'numberOfIntensities',...
-            'numberOfRepeats',...
-            'interpulseInterval',...
-            'ampHoldSignal',...
-            'backgroundAmplitude'};
-        
     end
     
     methods
         
-        function obj = AmpRespModel(channels)
+        function obj = GraphingService(channels)
+            import constants.*;
+            
             obj.serviceContext = struct();
             obj.channels = channels;
             
             for i = 1:length(channels)
                 ch = channels{i};
-                values = {false, obj.colorSet{i}, 0, 1, 'b*'};
-                obj.serviceContext.(ch).props = containers.Map(obj.plotKeys, values);
+                obj.serviceContext.(ch).props = GraphingConstants.getMainGraphProperties(i);
                 obj.serviceContext.(ch).statistics = service.SpikeStatistics(ch);
             end
         end
@@ -47,14 +37,19 @@ classdef AmpRespModel < handle
         
         function [x, y, threshold] = getSpike(obj, channel, epoch)
             x = []; y = [];
-            spd = obj.serviceContext.(channel).statistics;
-            threshold = spd.threshold;
-            if spd.enabled
+            s = obj.serviceContext.(channel).statistics;
+            threshold = s.threshold;
+            if s.enabled
                 [x ,y] = getReponse(obj, channel, epoch);
-                [indices, s] = spd.detect(epoch, obj.epochId);
-                x = indices/s;
+                [indices, rate] = s.detect(epoch, obj.epochId);
+                x = indices/rate;
                 y = y(indices);
             end
+        end
+        
+        function computeAverage(obj, channel, epoch)
+            s = obj.serviceContext.(channel).statistics;
+            s.computeAvgResponseForTrails(epoch, obj.epochId);
         end
         
         function x = changeOffSet(obj, x, ch)
@@ -108,7 +103,7 @@ classdef AmpRespModel < handle
         %simplicity
         function changed = isProtocolChanged(obj, epoch)
             obj.epochId = obj.epochId + 1;
-            schema = obj.parameterSchema;
+            schema = constants.GraphingConstants.LED_PROTOCOL_PARAMETERS.cell;
             notChanged = true;
             
             if isempty(obj.lastProtocol)

@@ -91,6 +91,25 @@ classdef TestSpikeStatistics < matlab.unittest.TestCase
             obj.verifyEqual(actual, expected); 
             %TODO to validate PSTHCount and smoothing window
         end
+        
+        % input details - {'pulseAmplitude', 490, 'scalingFactor', 2, 'numberOfIntensities', 5};
+        function computeAvgResponseForTrails(obj)
+            s = obj.spikeStatisctics;
+            start = obj.epoch.index -1;
+            s.computeAvgResponseForTrails(obj.epoch, start);
+            obj.verifyEqual(length(s.avgResponse), 5);
+            for i = 1:5
+                 s.computeAvgResponseForTrails(obj.epoch, start + i -1);
+                 obj.verifyEqual(s.avgResponse{i}.r, obj.epoch.response('ch1'));
+            end
+            r_cache = s.avgResponse;
+            start = obj.epoch.index -1 + 5;
+            for i = 1:5
+                 s.computeAvgResponseForTrails(obj.epoch, start -1);
+                 expected = mean([r_cache{i}.r , obj.epoch.response('ch1')], 2);
+                 obj.verifyEqual(s.avgResponse{i}.r, expected);
+            end
+        end
     end
 end
 

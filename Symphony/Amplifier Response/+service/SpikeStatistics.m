@@ -9,6 +9,7 @@ classdef SpikeStatistics < handle
         indices
         activeIntensityIndex
         smoothingWindow
+        avgResponse % cell array for storing each response by trails
     end
     
     properties(Access = private)
@@ -19,6 +20,8 @@ classdef SpikeStatistics < handle
         epochParams
         lastEpochId
         startEpochId
+        % average response by trail  
+        avgResponseByTrail = struct('r', [], 'n', 1);
     end
     
     
@@ -44,6 +47,7 @@ classdef SpikeStatistics < handle
             obj.epochParams = epoch.parameters;
             [data, ~, ~] = epoch.response(obj.amplifier);
             obj.epochLength = length(data);
+            obj.avgResponse = cell(epoch.parameters.numberOfIntensities, 1);
         end
         
         function [indices, s] = detect(obj, epoch, id)
@@ -58,6 +62,27 @@ classdef SpikeStatistics < handle
             indices = util.Signal.getIndicesByThreshold(data, t, sign(t));
             obj.indices(num2str(id)) = indices;
             obj.lastEpochId = id;
+        end
+        
+        function computeAvgResponseForTrails(obj, epoch, id)
+            numberOfIntensities = obj.epochParams.numberOfIntensities;
+            trailId = mod(id, numberOfIntensities)+1;
+            if isempty(obj.avgResponse{trailId})
+                obj.avgResponseByTrail.r = epoch.response(obj.amplifier);
+                obj.avgResponseByTrail.n = 1;
+                obj.avgResponse{trailId} = obj.avgResponseByTrail;
+                return;
+            end
+            c = obj.avgResponse{trailId}.n;
+            sum = c *  obj.avgResponse{trailId}.r +  epoch.response(obj.amplifier);
+            c = c + 1;
+            obj.avgResponse{trailId}.r = sum/ c;
+            obj.avgResponse{trailId}.n = c;
+        end
+        
+        function [x,y] = getAvgResponse(obj, stimulsIndex)
+            y = obj.avgResponse{stimulsIndex}.r;
+            x = (1:numel(y))/obj.epochParams.sampleRate;
         end
         
         function [x, count] = getPSTH(obj, stimulsIndex)

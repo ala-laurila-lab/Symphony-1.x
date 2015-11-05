@@ -22,7 +22,7 @@ classdef AmplifierResponse < Module
             set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
             set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
             
-            model = model.AmpRespModel(rigConfig.multiClampDeviceNames);
+            model = model.GraphingService(rigConfig.multiClampDeviceNames);
             view = view.AmpRespView(obj.figureHandle);
             obj.presenter = presenter.AmpRespPresenter(model, view);
             

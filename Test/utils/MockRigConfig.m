@@ -10,7 +10,7 @@ classdef MockRigConfig < handle
         end
 
     	function channels = multiClampDeviceNames(obj)
-    		channels = {'ch1', 'ch2', 'ch3', 'ch4'};
+    		channels = {'ch1', 'ch2'};
     	end
     end
     
