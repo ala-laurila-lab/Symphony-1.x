@@ -124,6 +124,10 @@ classdef GraphingService < handle
             obj.lastProtocol = [];
             cellfun(@(ch) obj.serviceContext.(ch).statistics.init(epoch), obj.channels);
         end
+        
+        function tf = isStarted(obj)
+            tf = obj.epochId > 0;
+        end
     end
     
 end

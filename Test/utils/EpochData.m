@@ -99,7 +99,7 @@ classdef EpochData < handle
                 units = '';
             else
                 temp = h5read(fullfile(obj.RAW_DATA_FOLDER, [obj.parentCell.savedFileName '.h5']),obj.dataLinks(streamName));
-                data = temp.quantity;
+                data = temp.quantity';
                 units = deblank(temp.unit(:,1)');
                 sampleRate = obj.get('sampleRate');
                 % temp hack

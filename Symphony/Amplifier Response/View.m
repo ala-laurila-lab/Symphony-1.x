@@ -1,20 +1,20 @@
 classdef View < handle
-
+    
     events
         KeyPress
         Close
     end
-
+    
     properties
         position
     end
-
+    
     properties (Access = protected)
         figureHandle
     end
-
+    
     methods
-
+        
         function obj = View(figureHandle)
             
             if isempty(figureHandle)
@@ -28,7 +28,7 @@ classdef View < handle
                     'Interruptible', 'off', ...
                     'CloseRequestFcn', @(h,d)notify(obj, 'Close'));
             else
-                 obj.figureHandle = figureHandle;
+                obj.figureHandle = figureHandle;
             end
             
             if ispc
@@ -38,7 +38,7 @@ classdef View < handle
                 set(obj.figureHandle, 'DefaultUicontrolFontName', 'Helvetica Neue');
                 set(obj.figureHandle, 'DefaultUicontrolFontSize', 12);
             end
-
+            
             try
                 obj.createUi();
             catch x
@@ -46,44 +46,46 @@ classdef View < handle
                 rethrow(x);
             end
         end
-
+        
         function delete(obj)
             obj.close();
         end
-
+        
         function setWindowStyle(obj, s)
             set(obj.figureHandle, 'WindowStyle', s);
         end
-
+        
         function show(obj)
             figure(obj.figureHandle);
         end
-
+        
         function hide(obj)
             set(obj.figureHandle, 'Visible', 'off');
             obj.resume();
         end
-
+        
         function close(obj)
-            delete(obj.figureHandle);
+            if ishandle(obj.figureHandle)
+                delete(obj.figureHandle);
+            end
         end
-
+        
         function wait(obj)
             uiwait(obj.figureHandle);
         end
-
+        
         function resume(obj)
             uiresume(obj.figureHandle);
         end
-
+        
         function update(obj) %#ok<MANU>
             drawnow();
         end
-
+        
         function showError(obj, msg)
             obj.showMessage(msg, 'Error');
         end
-
+        
         function r = showMessage(obj, text, title, button1, button2, button3, default) %#ok<INUSL>
             if nargin < 3
                 title = '';
@@ -104,7 +106,7 @@ classdef View < handle
             presenter.goWaitStop();
             r = presenter.result;
         end
-
+        
         function showWeb(obj, url) %#ok<INUSL>
             web(url);
         end
@@ -120,7 +122,7 @@ classdef View < handle
             end
             p = folderName;
         end
-
+        
         function p = showGetFile(obj, title, filter, defaultName) %#ok<INUSL>
             if nargin < 3
                 filter = '*';
@@ -135,7 +137,7 @@ classdef View < handle
             end
             p = fullfile(pathname, filename);
         end
-
+        
         function p = showPutFile(obj, title, filter, defaultName) %#ok<INUSL>
             if nargin < 3
                 filter = '*';
@@ -150,19 +152,19 @@ classdef View < handle
             end
             p = fullfile(pathname, filename);
         end
-
+        
         function p = get.position(obj)
             p = get(obj.figureHandle, 'Position');
         end
-
+        
         function set.position(obj, p)
             set(obj.figureHandle, 'Position', p); %#ok<MCSUP>
         end
-
+        
     end
-
+    
     methods (Abstract)
         createUi(obj);
     end
-
+    
 end

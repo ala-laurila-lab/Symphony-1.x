@@ -14,20 +14,15 @@ classdef AmplifierResponse < Module
         function obj = AmplifierResponse(symphonyUI)
             obj = obj@Module(symphonyUI);
             obj.symphonyUI.protocol.moduleRegister(obj.displayName, obj);
-            obj.createView
+            obj.createView();
         end
         
         function createView(obj)
             rigConfig = obj.symphonyUI.rigConfig;
-            set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
-            set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
-            
-            model = model.GraphingService(rigConfig.multiClampDeviceNames);
-            view = view.AmpRespView(obj.figureHandle);
-            obj.presenter = presenter.AmpRespPresenter(model, view);
-            
-            obj.presenter.init
-            obj.presenter.show
+            s = service.GraphingService(rigConfig.multiClampDeviceNames);
+            v = views.MainGraphView(obj.figureHandle);
+            obj.presenter = presenters.MainGraphPresenter(s, v);
+            obj.presenter.go();
         end
         
         function handleEpoch(obj, epoch)
@@ -37,6 +32,14 @@ classdef AmplifierResponse < Module
         function close(obj)
             obj.symphonyUI.protocol.moduleUnRegister(obj.displayName);
             close@Module(obj)
+        end
+        
+        function delete(obj)
+            if ~isempty(obj.figureHandle)
+                % Remember the window position.
+                setpref('Symphony', [class(obj) '_Position'], get(obj.figureHandle, 'Position'));
+                obj.figureHandle = [];
+            end
         end
     end
 end

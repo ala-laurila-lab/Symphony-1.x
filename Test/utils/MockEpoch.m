@@ -21,6 +21,8 @@ classdef MockEpoch < handle
         function obj = MockEpoch
            if ~exist(fullfile(obj.LOCAL_PATH, obj.FILE) , 'file')
                obj.download; 
+               data = CellData('./Test/data/061915Ac4.h5');
+               save('cellData.mat', 'data')
            end
             temp = load('cellData.mat');
             obj.data = temp.data;

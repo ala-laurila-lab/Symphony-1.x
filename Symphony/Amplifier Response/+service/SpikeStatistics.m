@@ -36,14 +36,14 @@ classdef SpikeStatistics < handle
         function obj = SpikeStatistics(amplifier)
             obj.threshold = 0;
             obj.amplifier = amplifier;
-            obj.indices = containers.Map;
+            obj.indices =  containers.Map('KeyType', 'int32', 'ValueType', 'any');
             obj.lastEpochId = 0;
             obj.startEpochId = 0;
             obj.smoothingWindow = 0;
         end
         
         function init(obj, epoch)
-            obj.indices = containers.Map;
+            obj.indices = containers.Map('KeyType', 'int32', 'ValueType', 'any');
             obj.epochParams = epoch.parameters;
             [data, ~, ~] = epoch.response(obj.amplifier);
             obj.epochLength = length(data);
@@ -60,7 +60,7 @@ classdef SpikeStatistics < handle
             data = data - m;
             t = obj.threshold - m;
             indices = util.Signal.getIndicesByThreshold(data, t, sign(t));
-            obj.indices(num2str(id)) = indices;
+            obj.indices(id) = indices;
             obj.lastEpochId = id;
         end
         
@@ -120,7 +120,7 @@ classdef SpikeStatistics < handle
             columns = columns(columns >= obj.startEpochId);
             n = length(columns);
             for i = 1:n
-                spikes = [spikes, obj.indices(num2str(columns(i)))'];
+                spikes = [spikes, obj.indices(columns(i))];
             end
             trail = struct();
             trail.spikes = spikes;

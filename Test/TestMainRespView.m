@@ -20,8 +20,8 @@ classdef TestMainRespView  < handle
                 'NumberTitle', 'off' );
             app = MockRigConfig();
             s = service.GraphingService(app.multiClampDeviceNames);
-            v = view.MainGraphView(obj.figureHandle);
-            obj.presenter = presenter.MainGraphPresenter(s, v);
+            v = views.MainGraphView(obj.figureHandle);
+            obj.presenter = presenters.MainGraphPresenter(s, v);
             obj.presenter.go();
         end
         

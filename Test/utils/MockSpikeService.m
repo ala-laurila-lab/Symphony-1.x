@@ -30,5 +30,5 @@ classdef MockSpikeService < handle
     
 end
 % usage 
-% p = presenter.AverageResponsePresenter(view.AverageResponseView(), MockSpikeService.createMockObj()); p.go();
-% p = presenter.PsthResponsePresenter(view.PsthResponseView(), MockSpikeService.createMockObj()); p.go();
+% p = presenter.AverageResponsePresenter(MockSpikeService.createMockObj()); p.go();
+% p = presenter.PsthResponsePresenter(MockSpikeService.createMockObj()); p.go();

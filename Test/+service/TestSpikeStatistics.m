@@ -106,7 +106,7 @@ classdef TestSpikeStatistics < matlab.unittest.TestCase
             start = obj.epoch.index -1 + 5;
             for i = 1:5
                  s.computeAvgResponseForTrails(obj.epoch, start -1);
-                 expected = mean([r_cache{i}.r , obj.epoch.response('ch1')], 2);
+                 expected = mean([r_cache{i}.r ; obj.epoch.response('ch1')], 1);
                  obj.verifyEqual(s.avgResponse{i}.r, expected);
             end
         end
