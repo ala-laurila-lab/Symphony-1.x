@@ -661,6 +661,7 @@ classdef GraphingAmplifierResponse < Module
         % information for plotting the data
         function handleEpoch(obj, epoch)
             obj.removeResponses(false);
+            obj.amp = obj.symphonyUI.protocol.amp;
             graphResponses( obj , epoch );
         end
         
