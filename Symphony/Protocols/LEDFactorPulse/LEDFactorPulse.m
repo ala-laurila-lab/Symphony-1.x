@@ -20,15 +20,16 @@ classdef LEDFactorPulse < LabProtocol
     properties
         amp
         StimulusLED = {'Ch1','Ch2','Ch3'}     % Note: To use a third channel add 'Ch3' to the object
-        initialPulseAmplitude = 100
-        scalingFactor = 2
-        preTime = 50
+        initialPulseAmplitude = 1000
+        scalingFactor = 1
+        preTime = 500
         stimTime = 500
-        tailTime = 50
-        numberOfIntensities = 5
-        numberOfRepeats = 1
+        tailTime = 500
+        numberOfIntensities = 1
+        numberOfRepeats = 5
         interpulseInterval = 0
-        ampHoldSignal = -50
+        interepochgrpInterval  = 0
+        ampHoldSignal = 0
         %lightRange = {'pico','nano','micro','raw'}
     end
     
@@ -118,7 +119,9 @@ classdef LEDFactorPulse < LabProtocol
             queueEpoch@SymphonyProtocol(obj, epoch);
             
             % Queue an inter-pulse interval after queuing the epoch.
-            if obj.interpulseInterval > 0
+            if obj.interepochgrpInterval > 0 && mod(obj.numEpochsQueued, obj.numberOfIntensities) == 0
+                obj.queueInterval(obj.interepochgrpInterval);
+            elseif obj.interpulseInterval > 0
                 obj.queueInterval(obj.interpulseInterval);
             end
         end
