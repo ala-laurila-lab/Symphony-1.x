@@ -18,8 +18,9 @@ classdef TestMainRespView  < handle
                 'MenuBar', 'none', ...
                 'Toolbar', 'none', ...
                 'NumberTitle', 'off' );
-            app = MockRigConfig();
-            s = service.GraphingService(app.multiClampDeviceNames);
+            mockFactory = MockFactory.getInstance();
+            s = service.GraphingService({'amp1', 'amp2'});
+            s.protocol = mockFactory.getLEDLabProtocol();
             v = views.MainGraphView(obj.figureHandle);
             obj.presenter = presenters.MainGraphPresenter(s, v);
             obj.presenter.go();

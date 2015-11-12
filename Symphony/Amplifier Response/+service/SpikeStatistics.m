@@ -20,7 +20,7 @@ classdef SpikeStatistics < handle
         epochParams
         lastEpochId
         startEpochId
-        % average response by trail  
+        % average response by trail
         avgResponseByTrail = struct('r', [], 'n', 1);
     end
     
@@ -132,6 +132,10 @@ classdef SpikeStatistics < handle
             scale = obj.epochParams.scalingFactor;
             exponent = (0 : obj.epochParams.numberOfIntensities-1);
             intensities = arrayfun(@(n) round((scale^n)*v), exponent);
+        end
+        
+        function setSmoothingWindow(obj, window)
+            obj.smoothingWindow = window;
         end
     end
 end

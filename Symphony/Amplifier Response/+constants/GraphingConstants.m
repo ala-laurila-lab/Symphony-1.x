@@ -30,7 +30,7 @@ classdef GraphingConstants
         function p = getMainGraphProperties(idx)
             import constants.*;
              c = GraphingConstants.COLOR_SET.cell{idx};
-             v = {false, c.getValue(), 0, 1, 'b*'};
+             v = {false, c.getValue(), 0, 1, 'r*'};
              p = containers.Map(GraphingConstants.MAIN_GRAPH_PROPERTIES_KEY.cell, v);
         end
     end

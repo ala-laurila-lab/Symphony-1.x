@@ -7,6 +7,9 @@ classdef MainGraphView < views.GraphView
         spikeDetectionDisabledBtn
         psthResponseChkBox
         avgResponseChkBox
+        epochSummaryText
+        protocolSummaryText
+        deviceSummaryText
     end
     
     events
@@ -22,13 +25,58 @@ classdef MainGraphView < views.GraphView
         
         function obj = MainGraphView(figureHandle)
             obj@views.GraphView(figureHandle);
+            set(obj.layout, 'Sizes', [60 -5 100]);
         end
         
-        function setInfoLayout(~)
-            % TODO add some text
+        function setInfoLayout(obj)
+            summaryLayout =  uiextras.VBox('Parent', obj.infoLayout);
+            epochSummaryLayout =  uiextras.HBox(...
+                'Parent', summaryLayout,...
+                'Padding', 1, 'Spacing', 1);
+            uicontrol(...,
+                'Parent', epochSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String','Epoch Summary - ');
+            obj.epochSummaryText = uicontrol(...,
+                'Parent', epochSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String','0 / 0');
+            set(epochSummaryLayout, 'Sizes', [150 -1]);
+            
+            protocolSummaryLayout = uiextras.HBox(...
+                'Parent', summaryLayout,...
+                'Padding', 1, 'Spacing', 1);
+            uicontrol(...,
+                'Parent', protocolSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String','Protocol summary - ');
+            obj.protocolSummaryText = uicontrol(...,
+                'Parent', protocolSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String',' NA ');
+            set(protocolSummaryLayout, 'Sizes', [150 -1]);
+           
+            deviceSummaryLayout = uiextras.HBox(...
+                'Parent', summaryLayout,...
+                'Padding', 1, 'Spacing', 1);
+            uicontrol(...,
+                'Parent', deviceSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String','Device summary - ');
+            obj.deviceSummaryText = uicontrol(...,
+                'Parent', deviceSummaryLayout,...
+                'Style','text',...
+                'HorizontalAlignment', 'left',...
+                'String',' NA ');
+            set(deviceSummaryLayout, 'Sizes', [150 -1]);
         end
         
-        function setControlsLayout(obj, channels)
+        function setControlsLayout(obj, channels)   
             
             controlPannel = uiextras.HBox(...
                 'Parent', obj.controlsLayout,...
@@ -111,8 +159,8 @@ classdef MainGraphView < views.GraphView
         end
         
         function idx = getSelectedChannelIdx(obj)
-             c = obj.amplifierCheckBox;
-             idx = obj.getSelectedCheckBoxIndices(c);
+            c = obj.amplifierCheckBox;
+            idx = obj.getSelectedCheckBoxIndices(c);
         end
         
         function viewAverageResponseCheckBox(obj, tf)
@@ -121,6 +169,18 @@ classdef MainGraphView < views.GraphView
         
         function viewPSTHResponseCheckBox(obj, tf)
             set(obj.psthResponseChkBox, 'Enable', util.onOff(tf));
+        end
+        
+        function viewEpochSummary(obj, epochsCompleted, totalEpochs)
+            set(obj.epochSummaryText, 'String', sprintf('%d / %d (No of Epochs completed / Total Number of Epochs)', epochsCompleted, totalEpochs));
+        end
+        
+        function viewProtocolSummary(obj, str)
+            set(obj.protocolSummaryText, 'String', str);
+        end
+        
+        function viewDeviceSummary(obj, str)
+            set(obj.deviceSummaryText, 'String', str);
         end
     end
 end

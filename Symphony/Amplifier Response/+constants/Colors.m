@@ -34,8 +34,8 @@ classdef Colors
     end
     
     enumeration
-        Red       (1, 0, 0)
         Green     (0, 1, 0)
+        Red       (1, 0, 0)
         Blue      (0, 0, 1)
         Yellow    (1, 1, 0)
         Cyan      (0, 1, 1)

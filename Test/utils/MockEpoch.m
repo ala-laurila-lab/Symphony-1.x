@@ -45,6 +45,10 @@ classdef MockEpoch < handle
             end
         end
         
+        function tf = containsParameter(obj, name)
+            tf = false;
+        end
+        
         function s = toStruct(obj, i)
             s = obj.parameters;
             [r, ~, ~] = obj.data.epochs(i).getData;

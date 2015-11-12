@@ -222,6 +222,12 @@ classdef LEDFactorPulse < LabProtocol
                 error('StimulusLED:CONTROLLER:ERROR', 'The max value for the protocol has to be less then 10,000mV')
             end
         end
+        
+        function str = tostr(obj)
+            stimulsAmplitude = obj.storedPulseAmplitudeAndBackground{obj.numEpochsCompleted};
+            str = sprintf('Stimulus amplitude = %d mv, Intensity = %d (initial amplitude) * %d, %d repetitions,  Holding signal = %d',...
+                stimulsAmplitude, obj.initialPulseAmplitude, obj.numberOfIntensities, obj.numberOfRepeats, obj.ampHoldSignal );
+        end
     end
     
 end
