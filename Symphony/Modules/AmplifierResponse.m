@@ -20,12 +20,13 @@ classdef AmplifierResponse < Module
         function createView(obj)
             rigConfig = obj.symphonyUI.rigConfig;
             s = service.GraphingService(rigConfig.multiClampDeviceNames);
+            s.protocol = obj.symphonyUI.protocol;
             v = views.MainGraphView(obj.figureHandle);
             obj.presenter = presenters.MainGraphPresenter(s, v);
             obj.presenter.go();
         end
         
-        function handleEpoch(obj, epoch)
+        function handleEpoch(obj, epoch)           
             obj.presenter.plotGraph(epoch);
         end
         

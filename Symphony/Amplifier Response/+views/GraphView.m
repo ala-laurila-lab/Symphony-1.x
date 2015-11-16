@@ -1,6 +1,7 @@
 classdef GraphView < View
     
     properties(Access = protected)
+        layout
         infoLayout
         graph
         controlsLayout
@@ -23,18 +24,19 @@ classdef GraphView < View
             end
            
             
-            layout = uiextras.VBox('Parent', obj.figureHandle);
-            obj.infoLayout = uiextras.HBox('Parent',layout);      % Information layout - to display some epoch statistics
+            obj.layout = uiextras.VBox('Parent', obj.figureHandle);
+            obj.infoLayout = uiextras.HBox('Parent',obj.layout);      % Information layout - to display some epoch statistics
             graphPanel = uiextras.BoxPanel(...
                 'Title', 'Amplifier Response',...
-                'Parent', layout,...
+                'Parent', obj.layout,...
                 'BackgroundColor', 'black');
             obj.graph = axes(...
                 'Parent', graphPanel, ...
                 'ActivePositionProperty', 'OuterPosition');
             obj.resetGraph();
-            obj.controlsLayout = uiextras.HBox('Parent',layout);  % Overidden by subclass for specific graph controls
-            set(layout, 'Sizes', [-0.5 -5 100]);
+            obj.controlsLayout = uiextras.HBox('Parent',obj.layout);  % Overidden by subclass for specific graph controls
+            set(obj.layout, 'Sizes', [0.1 -5 100]);
+           
         end
         
         function setInfoLayout(~)
@@ -66,7 +68,7 @@ classdef GraphView < View
         
         function refline(obj, x, threshold)
             y_threshold = threshold * ones(1, length(x));
-            plot(obj.graph, x, y_threshold, 'color', 'blue');
+            plot(obj.graph, x, y_threshold, 'color', 'red');
             hold(obj.graph, 'on');
         end
         

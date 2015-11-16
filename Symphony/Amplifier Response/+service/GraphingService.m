@@ -6,6 +6,7 @@ classdef GraphingService < handle
          % Field (1) (channels{i}).props; Value(1) for main graph properties refer getMainGraphProperties@GraphingConstants
          % Filed (2) (channels{i}).statistics; Value(2) service.SpikeStatistics objcet for each channel 
         serviceContext
+        protocol
     end
     
     properties(Access = private)
@@ -127,6 +128,13 @@ classdef GraphingService < handle
         
         function tf = isStarted(obj)
             tf = obj.epochId > 0;
+        end
+        
+        function str = getDeviceInfo(~, epoch)
+            str = 'Temprature';
+            if epoch.containsParameter('Temp')
+                str = sprintf('%s = %g C', str, epoch.getParameter('Temp'));
+            end
         end
     end
     

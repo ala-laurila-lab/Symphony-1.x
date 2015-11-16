@@ -41,12 +41,12 @@ classdef AverageResponsePresenter < Presenter
             legends = GraphingConstants.COLOR_SET.cell;
             
             v = obj.view;
-            indices = v.getSelectedVoltageIndex();
+            idx = v.getSelectedVoltageIndex();
             channel = v.getSelectedChannel();
-            for i = 1:length(indices)
+            for i = 1:length(idx)
                 s = obj.spikeServices(channel);
-                [x, y] = s.getAvgResponse(indices(i));
-                v.plot(x, y, 'color', legends{indices(i)});
+                [x, y] = s.getAvgResponse(idx(i));
+                v.plot(x, y, 'color', legends{idx(i)}.getValue());
             end
             v.resetGraph();
             v.renderGraph();

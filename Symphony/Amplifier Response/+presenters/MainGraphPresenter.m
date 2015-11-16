@@ -11,6 +11,7 @@ classdef MainGraphPresenter < Presenter
         function onGoing(obj)
             v = obj.view;
             v.setControlsLayout(obj.graphingService.channels);
+            v.setInfoLayout();
         end
         
         function onBind(obj)
@@ -63,15 +64,20 @@ classdef MainGraphPresenter < Presenter
         
         function plotGraph(obj, epoch)
             s = obj.graphingService;
+            
             if s.isProtocolChanged(epoch)
                 s.reset(epoch);
                 %TODO alert user for change of protocol
                 obj.closeAverageResponsePresenter();
                 obj.closePSTHResponsePresenter();
             end
-            v = obj.view;
-            chs = s.getActiveChannels();
             
+            v = obj.view;
+            v.viewEpochSummary(s.protocol.numEpochsCompleted, s.protocol.numberOfEpochs);
+            v.viewProtocolSummary(s.protocol.tostr());
+            v.viewDeviceSummary(s.getDeviceInfo(epoch));
+            
+            chs = s.getActiveChannels();
             for i = 1:length(chs)
                 [x, y, props] = s.getReponse(chs{i}, epoch);
                 v.plot(x, y, 'color', props('color'));
@@ -79,10 +85,10 @@ classdef MainGraphPresenter < Presenter
                 s.computeAverage(chs{i}, epoch);
                 v.refline(x, threshold);
                 v.plotSpike(x1, y1, props);
-                
             end
             v.resetGraph();
             v.renderGraph();
+            
             obj.showAverageResponse();
             obj.showPSTHResponse();
         end
