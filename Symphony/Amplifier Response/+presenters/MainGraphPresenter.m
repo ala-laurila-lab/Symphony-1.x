@@ -16,12 +16,17 @@ classdef MainGraphPresenter < Presenter
         
         function onBind(obj)
             v = obj.view;
-            obj.addListener(v, 'UpdateSelectedAmplifiers', @obj.updateAmplifiers);
+            obj.addListener(v, 'UpdateSelectedAmplifiers', @obj.updateSelectedChannels);
             obj.addListener(v, 'StartSpikeDetection', @obj.startSpikeDetection);
             obj.addListener(v, 'StopSpikeDetection', @obj.stopSpikeDetection);
             obj.addListener(v, 'SetThreshold', @obj.setThreshold);
             obj.addListener(v, 'ShowPsthResponse', @obj.showPSTHResponse);
             obj.addListener(v, 'ShowAvgResponse', @obj.showAverageResponse);
+        end
+        
+        function onGo(obj)
+            obj.updateSelectedChannels();
+            obj.startSpikeDetection();
         end
     end
     
@@ -32,11 +37,15 @@ classdef MainGraphPresenter < Presenter
             obj.graphingService = service;
         end
         
-        function updateAmplifiers(obj, ~, eventData)
-            channel = eventData.key;
-            obj.graphingService.set(channel, 'active', eventData.value);
+        function updateSelectedChannels(obj, ~, ~)
             v = obj.view;
+           
             idx = v.getSelectedChannelIdx();
+            channels = obj.graphingService.channels(idx);
+            inActiveChannels = obj.graphingService.channels(~idx);
+            arrayfun(@(ch) obj.graphingService.set(ch{1}, 'active', 1), channels)
+            arrayfun(@(ch) obj.graphingService.set(ch{1}, 'active', 0), inActiveChannels)
+            
             tf = ~ isempty(idx);
             v.viewAverageResponseCheckBox(tf);
             v.viewPSTHResponseCheckBox(tf);
@@ -59,7 +68,7 @@ classdef MainGraphPresenter < Presenter
         function stopSpikeDetection(obj, ~, ~)
             s = obj.graphingService;
             channels = s.getActiveChannels;
-            cellfun(@(ch) m.setSpikeDetector(ch, 0), channels);
+            cellfun(@(ch) s.setSpikeDetector(ch, 0), channels);
         end
         
         function plotGraph(obj, epoch)

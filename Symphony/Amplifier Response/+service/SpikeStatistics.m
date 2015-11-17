@@ -118,9 +118,12 @@ classdef SpikeStatistics < handle
             spikes = [];
             columns = (id : obj.epochParams.numberOfIntensities : obj.lastEpochId);
             columns = columns(columns >= obj.startEpochId);
-            n = length(columns);
-            for i = 1:n
-                spikes = [spikes, obj.indices(columns(i))];
+            n = 0;
+            for i = 1:length(columns)
+                if isKey(obj.indices, columns(i))
+                    spikes = [spikes, obj.indices(columns(i))];
+                    n = n + 1;
+                end
             end
             trail = struct();
             trail.spikes = spikes;
