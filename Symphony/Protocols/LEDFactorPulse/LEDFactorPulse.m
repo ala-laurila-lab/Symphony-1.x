@@ -232,6 +232,4 @@ classdef LEDFactorPulse < LabProtocol
                 stimulsAmplitude, obj.initialPulseAmplitude, obj.numberOfIntensities, obj.numberOfRepeats, obj.ampHoldSignal );
         end
     end
-    
 end
-

@@ -128,7 +128,7 @@ classdef SpikeStatistics < handle
         end
         
         function intensities = intensitiesToVoltages(obj)
-            v = obj.epochParams.pulseAmplitude;
+            v = obj.epochParams.initialPulseAmplitude;
             scale = obj.epochParams.scalingFactor;
             exponent = (0 : obj.epochParams.numberOfIntensities-1);
             intensities = arrayfun(@(n) round((scale^n)*v), exponent);
