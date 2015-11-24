@@ -7,9 +7,6 @@ classdef MainGraphView < views.GraphView
         spikeDetectionDisabledBtn
         psthResponseChkBox
         avgResponseChkBox
-        epochSummaryText
-        protocolSummaryText
-        deviceSummaryText
     end
     
     events
@@ -25,61 +22,10 @@ classdef MainGraphView < views.GraphView
         
         function obj = MainGraphView(figureHandle)
             obj@views.GraphView(figureHandle);
-            set(obj.layout, 'Sizes', [120 -5 100]);
+            set(obj.layout, 'Sizes', [0 -5 60]);
         end
         
-        function setInfoLayout(obj)
-            summaryLayout =  uiextras.VBox('Parent', obj.infoLayout);
-            epochSummaryLayout =  uiextras.HBox(...
-                'Parent', summaryLayout,...
-                'Padding', 1, 'Spacing', 1);
-            uicontrol(...,
-                'Parent', epochSummaryLayout,...
-                'Fontsize', 13,...
-                'Style','text',...
-                'HorizontalAlignment', 'left',...
-                'String','Epoch Summary - ');
-            obj.epochSummaryText = uicontrol(...,
-                'Parent', epochSummaryLayout,...
-                'Fontsize', 13,...
-                'Style','text',...
-                'HorizontalAlignment', 'left',...
-                'String','0 / 0');
-            set(epochSummaryLayout, 'Sizes', [200 -1]);
-            
-            protocolSummaryLayout = uiextras.HBox(...
-                'Parent', summaryLayout,...
-                'Padding', 1, 'Spacing', 1);
-            uicontrol(...,
-                'Parent', protocolSummaryLayout,...
-                'Style','text',...
-                'Fontsize', 13,...
-                'HorizontalAlignment', 'left',...
-                'String','Protocol summary - ');
-            obj.protocolSummaryText = uicontrol(...,
-                'Parent', protocolSummaryLayout,...
-                'Style','text',...
-                'Fontsize', 13,...
-                'HorizontalAlignment', 'left',...
-                'String',' NA ');
-            set(protocolSummaryLayout, 'Sizes', [200 -1]);
-           
-            deviceSummaryLayout = uiextras.HBox(...
-                'Parent', summaryLayout,...
-                'Padding', 1, 'Spacing', 1);
-            uicontrol(...,
-                'Parent', deviceSummaryLayout,...
-                'Style','text',...
-                'Fontsize', 13,...
-                'HorizontalAlignment', 'left',...
-                'String','Device summary - ');
-            obj.deviceSummaryText = uicontrol(...,
-                'Parent', deviceSummaryLayout,...
-                'Style','text',...
-                'Fontsize', 13,...
-                'HorizontalAlignment', 'left',...
-                'String',' NA ');
-            set(deviceSummaryLayout, 'Sizes', [200 -1]);
+        function setInfoLayout(~)
         end
         
         function setControlsLayout(obj, channels)   
@@ -165,6 +111,11 @@ classdef MainGraphView < views.GraphView
             hold(obj.graph, 'on');
         end
         
+        function setTitleText(obj, epochsCompleted, totalEpochs, protocolStr, deviceStr)
+            obj.titleText = sprintf('Epoch  %d / %d, %s, %s',...
+                epochsCompleted, totalEpochs, protocolStr, deviceStr);
+        end
+        
         function idx = getSelectedChannelIdx(obj)
             c = obj.amplifierCheckBox;
             idx = obj.getSelectedCheckBoxIndices(c);
@@ -183,16 +134,12 @@ classdef MainGraphView < views.GraphView
             set(obj.psthResponseChkBox, 'Enable', util.onOff(tf));
         end
         
-        function viewEpochSummary(obj, epochsCompleted, totalEpochs)
-            set(obj.epochSummaryText, 'String', sprintf('%d / %d (No of Epochs completed / Total Number of Epochs)', epochsCompleted, totalEpochs));
+        function viewSpikeEnableButton(obj ,tf)
+            set(obj.spikeDetectionEnabledBtn, 'Enable', util.onOff(tf));
         end
         
-        function viewProtocolSummary(obj, str)
-            set(obj.protocolSummaryText, 'String', str);
-        end
-        
-        function viewDeviceSummary(obj, str)
-            set(obj.deviceSummaryText, 'String', str);
+        function viewSpikeDisableButton(obj, tf)
+            set(obj.spikeDetectionDisabledBtn, 'Enable', util.onOff(tf));
         end
     end
 end

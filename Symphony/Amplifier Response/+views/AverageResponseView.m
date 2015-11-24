@@ -4,9 +4,11 @@ classdef AverageResponseView < views.GraphView
         voltageChkBox
         channelMenu
     end
-    
+
     events
         ShowAverageResponse
+        HoldAverageResponse
+        EraseHoldingResponse
     end
     
     methods
@@ -33,6 +35,20 @@ classdef AverageResponseView < views.GraphView
                 'Style', 'popup',...
                 'String', channels,...
                 'callback',@(h, d)notify(obj, 'ShowAverageResponse'));
+            
+            holdGraphControls = uiextras.HButtonBox(...,
+                'Parent', staticControls,...
+                'HorizontalAlignment', 'left');
+            
+            uicontrol(....
+                'Parent', holdGraphControls,...
+                'String', 'Save Graph',...
+                'callback',@(h, d)notify(obj, 'HoldAverageResponse'));
+            
+            uicontrol(....
+                'Parent', holdGraphControls,...
+                'String', 'Erase Graph',...
+                'callback',@(h, d)notify(obj, 'EraseHoldingResponse'));
             
             uicontrol(...,
                 'Parent', controlLayout,...
@@ -64,7 +80,7 @@ classdef AverageResponseView < views.GraphView
                     'String', '====' );
             end
             
-            set(staticControls, 'Sizes', [120 100]);
+            set(staticControls, 'Sizes', [120 100, 300]);
             set(dynamicControls, 'ColumnSizes', 80 * ones(1, n), 'RowSizes', 40);
             set(legendControls, 'ButtonSize', [80 35], 'Spacing', 5);
             set(controlLayout, 'Sizes', [-0.7 -0.3 -1 -0.5]); % -0.3 corresponds to text 'Select Intensity level'

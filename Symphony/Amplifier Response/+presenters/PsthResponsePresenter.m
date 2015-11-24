@@ -47,7 +47,7 @@ classdef PsthResponsePresenter < Presenter
             for i = 1:length(idx)
                 s = obj.spikeServices(channel);
                 if s.enabled
-                    s.setSmoothingWindow(v.getSmoothingWindow());
+                    s.smoothingWindow = v.getSmoothingWindow();
                     [x, y] = s.getPSTH(idx(i));
                     v.plot(x, y, 'color', legends{idx(i)}.getValue());
                 end

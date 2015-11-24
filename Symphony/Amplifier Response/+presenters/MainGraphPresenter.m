@@ -63,12 +63,16 @@ classdef MainGraphPresenter < Presenter
             obj.setThreshold();
             channels = s.getActiveChannels();
             cellfun(@(ch) s.setSpikeDetector(ch, 1), channels);
+            obj.view.viewSpikeEnableButton(false);
+            obj.view.viewSpikeDisableButton(true);
         end
         
         function stopSpikeDetection(obj, ~, ~)
             s = obj.graphingService;
             channels = s.getActiveChannels;
             cellfun(@(ch) s.setSpikeDetector(ch, 0), channels);
+            obj.view.viewSpikeEnableButton(true);
+            obj.view.viewSpikeDisableButton(false);
         end
         
         function plotGraph(obj, epoch)
@@ -82,10 +86,7 @@ classdef MainGraphPresenter < Presenter
             end
             
             v = obj.view;
-            v.viewEpochSummary(s.protocol.numEpochsCompleted, s.protocol.numberOfEpochs);
-            v.viewProtocolSummary(s.protocol.tostr());
-            v.viewDeviceSummary(s.getDeviceInfo(epoch));
-            
+            v.setTitleText(s.protocol.numEpochsCompleted, s.protocol.numberOfEpochs, s.protocol.tostr(), s.getDeviceInfo(epoch));
             chs = s.getActiveChannels();
             for i = 1:length(chs)
                 [x, y, props] = s.getReponse(chs{i}, epoch);
@@ -129,8 +130,8 @@ classdef MainGraphPresenter < Presenter
             
             presenter = obj.averageResponsePresenter;
             if isempty(presenter)
-                spikeService = service.getSpikeStatisticsMap();
-                presenter = presenters.AverageResponsePresenter(spikeService);
+                statisticsService = service.getResponseStatisticsMap();
+                presenter = presenters.AverageResponsePresenter(statisticsService);
                 addlistener(presenter, 'Stopped', @(h,d) obj.setAverageResponsePresenter([]));
                 presenter.go();
                 obj.averageResponsePresenter = presenter;
@@ -146,8 +147,8 @@ classdef MainGraphPresenter < Presenter
             
             presenter = obj.psthResponsePresenter;
             if isempty(obj.psthResponsePresenter)
-                spikeService = obj.graphingService.getSpikeStatisticsMap();
-                presenter = presenters.PsthResponsePresenter(spikeService);
+                statisticsService = obj.graphingService.getResponseStatisticsMap();
+                presenter = presenters.PsthResponsePresenter(statisticsService);
                 addlistener(presenter, 'Stopped', @(h,d) obj.setPsthResponsePresenter([]));
                 presenter.go();
                 obj.psthResponsePresenter = presenter;

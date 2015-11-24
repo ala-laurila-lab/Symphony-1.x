@@ -4,9 +4,10 @@ classdef GraphingService < handle
         channels % Has all the amplifer channels
          % Service context is the dynamic structure for above channels  
          % Field (1) (channels{i}).props; Value(1) for main graph properties refer getMainGraphProperties@GraphingConstants
-         % Filed (2) (channels{i}).statistics; Value(2) service.SpikeStatistics objcet for each channel 
+         % Filed (2) (channels{i}).statistics; Value(2) service.ResponseStatistics objcet for each channel 
         serviceContext
         protocol
+        averageGraphHolder
     end
     
     properties(Access = private)
@@ -25,25 +26,31 @@ classdef GraphingService < handle
             for i = 1:length(channels)
                 ch = channels{i};
                 obj.serviceContext.(ch).props = GraphingConstants.getMainGraphProperties(i);
-                obj.serviceContext.(ch).statistics = service.SpikeStatistics(ch);
+                obj.serviceContext.(ch).statistics = service.ResponseStatistics(ch);
             end
         end
         
         function [x, y, props] = getReponse(obj, channel, epoch)
+            stimStart = epoch.getParameter('preTime')*1E-3;
+            
             [r, s, ~] = epoch.response(channel);
-            x = (1:numel(r))/s;
+            m = mean(r);
+            r = r - m;
+            x = (1:numel(r))/s - stimStart;
             y = obj.changeOffSet(r, channel);
             props = obj.serviceContext.(channel).props;
         end
         
         function [x, y, threshold] = getSpike(obj, channel, epoch)
             x = []; y = [];
+            stimStart = epoch.getParameter('preTime')*1E-3;
+            
             s = obj.serviceContext.(channel).statistics;
             threshold = s.threshold;
             if s.enabled
-                [x ,y] = getReponse(obj, channel, epoch);
+                [~ ,y] = getReponse(obj, channel, epoch);
                 [indices, rate] = s.detect(epoch, obj.epochId);
-                x = indices/rate;
+                x = indices/rate - stimStart;
                 y = y(indices);
             end
         end
@@ -86,7 +93,7 @@ classdef GraphingService < handle
             spd.enabled = state;
         end
         
-        function map = getSpikeStatisticsMap(obj)
+        function map = getResponseStatisticsMap(obj)
             chs = obj.getActiveChannels;
             n = length(chs);
             s = cell(1, n);
