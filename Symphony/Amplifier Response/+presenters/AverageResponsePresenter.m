@@ -21,6 +21,7 @@ classdef AverageResponsePresenter < Presenter
             obj.addListener(v, 'ShowAverageResponse', @obj.viewAverageResponse);
             obj.addListener(v, 'HoldAverageResponse', @obj.holdResponse);
             obj.addListener(v, 'EraseHoldingResponse', @obj.clearHoldResponse);
+            obj.addListener(v, 'ShowAllAverageResponse', @obj.viewAllAverageResponse);
         end
         
         function onStopping(obj)
@@ -77,6 +78,13 @@ classdef AverageResponsePresenter < Presenter
             end
             v.resetGraph();
             v.renderGraph();
+        end
+        
+        function viewAllAverageResponse(obj, ~, ~)
+            v = obj.view;
+            tf = v.hasAllVoltagesChecked();
+            v.setAllVoltages(tf);
+            obj.viewAverageResponse();
         end
         
         % Get the current state of graph handles and store in

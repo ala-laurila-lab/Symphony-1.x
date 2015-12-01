@@ -3,12 +3,14 @@ classdef AverageResponseView < views.GraphView
     properties(Access = private)
         voltageChkBox
         channelMenu
+        selectAllVoltagesChkBox
     end
-
+    
     events
         ShowAverageResponse
         HoldAverageResponse
         EraseHoldingResponse
+        ShowAllAverageResponse
     end
     
     methods
@@ -64,8 +66,18 @@ classdef AverageResponseView < views.GraphView
                 'Parent', controlLayout,...
                 'HorizontalAlignment', 'left');
             
+            obj.selectAllVoltagesChkBox = uicontrol(...,
+                'Parent', dynamicControls,...
+                'Style','checkbox',...
+                'String','All',...
+                'Value',0,...
+                'callback',@(h, d)notify(obj, 'ShowAllAverageResponse'));
+            
+            uiextras.Empty('Parent', legendControls);
+
             n = length(voltages);
             obj.voltageChkBox = cell(1, n);
+            
             for i = 1:n
                 obj.voltageChkBox{i} = uicontrol(...,
                     'Parent', dynamicControls,...
@@ -101,6 +113,14 @@ classdef AverageResponseView < views.GraphView
         function idx = getSelectedVoltageIndex(obj)
             c = obj.voltageChkBox;
             idx = obj.getSelectedCheckBoxIndices(c);
+        end
+        
+        function setAllVoltages(obj, value)
+            cellfun(@(chkBox) set(chkBox, 'Value', value) , obj.voltageChkBox);
+        end
+        
+        function tf = hasAllVoltagesChecked(obj)
+             tf = get(obj.selectAllVoltagesChkBox,'Value');
         end
     end
 end

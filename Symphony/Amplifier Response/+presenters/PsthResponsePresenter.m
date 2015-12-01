@@ -17,6 +17,7 @@ classdef PsthResponsePresenter < Presenter
         function onBind(obj)
             v = obj.view;
             obj.addListener(v, 'ShowPsthResponse', @obj.viewPsthResponse);
+            obj.addListener(v, 'ShowAllPsthResponse', @obj.viewAllPsthResponse);
         end
         
         function onStopping(obj)
@@ -54,6 +55,13 @@ classdef PsthResponsePresenter < Presenter
             end
             v.resetGraph();
             v.renderGraph();
+        end
+        
+        function viewAllPsthResponse(obj, ~, ~)
+            v = obj.view;
+            tf = v.hasAllVoltagesChecked();
+            v.setAllVoltages(tf);
+            obj.viewPsthResponse();
         end
     end
 end

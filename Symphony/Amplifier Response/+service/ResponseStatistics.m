@@ -113,7 +113,7 @@ classdef ResponseStatistics < handle
         function n = getSampleSizePerBin(obj)
             rate = round(obj.sampleRate / 1E3);
             n = round(obj.BIN_WIDTH * rate);
-        end
+        end 
         
         function trail = getSpikeIndices(obj, id)
             spikes = [];

@@ -6,6 +6,7 @@ classdef AmplifierResponse < Module
     
     properties(Access = private)
         presenter
+        graphingService
     end
     
     
@@ -24,9 +25,11 @@ classdef AmplifierResponse < Module
             v = views.MainGraphView(obj.figureHandle);
             obj.presenter = presenters.MainGraphPresenter(s, v);
             obj.presenter.go();
+            obj.graphingService = s;
         end
         
-        function handleEpoch(obj, epoch)           
+        function handleEpoch(obj, epoch)
+            obj.graphingService.protocol = obj.symphonyUI.protocol;
             obj.presenter.plotGraph(epoch);
         end
         

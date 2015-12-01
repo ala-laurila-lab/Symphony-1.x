@@ -27,7 +27,7 @@ classdef MainGraphPresenter < Presenter
         function onGo(obj)
             obj.updateSelectedChannels();
             obj.startSpikeDetection();
-        end
+        end 
     end
     
     methods
@@ -39,46 +39,37 @@ classdef MainGraphPresenter < Presenter
         
         function updateSelectedChannels(obj, ~, ~)
             v = obj.view;
-           
             idx = v.getSelectedChannelIdx();
-            channels = obj.graphingService.channels(idx);
-            inActiveChannels = obj.graphingService.channels(~idx);
-            arrayfun(@(ch) obj.graphingService.set(ch{1}, 'active', 1), channels)
-            arrayfun(@(ch) obj.graphingService.set(ch{1}, 'active', 0), inActiveChannels)
+            obj.graphingService.updateChannels(idx);
             
             tf = ~ isempty(idx);
             v.viewAverageResponseCheckBox(tf);
             v.viewPSTHResponseCheckBox(tf);
         end
         
+        % set threshold for all channels 
+        % TODO - Can be individualized for channels  
         function setThreshold(obj, ~, ~)
-            s = obj.graphingService;
             threshold = obj.view.getSpikeThreshold();
-            channels = s.getActiveChannels();
-            cellfun(@(ch) s.setThreshold(ch, threshold), channels);
+            obj.graphingService.setThreshold(threshold);
         end
         
         function startSpikeDetection(obj, ~, ~)
-            s = obj.graphingService;
             obj.setThreshold();
-            channels = s.getActiveChannels();
-            cellfun(@(ch) s.setSpikeDetector(ch, 1), channels);
+            obj.graphingService.setSpikeDetector(true);
             obj.view.viewSpikeEnableButton(false);
             obj.view.viewSpikeDisableButton(true);
         end
         
         function stopSpikeDetection(obj, ~, ~)
-            s = obj.graphingService;
-            channels = s.getActiveChannels;
-            cellfun(@(ch) s.setSpikeDetector(ch, 0), channels);
+            obj.graphingService.setSpikeDetector(false);
             obj.view.viewSpikeEnableButton(true);
             obj.view.viewSpikeDisableButton(false);
         end
         
         function plotGraph(obj, epoch)
             s = obj.graphingService;
-            
-            if s.isProtocolChanged(epoch)
+            if s.hasProtocolChanged()
                 s.reset(epoch);
                 %TODO alert user for change of protocol
                 obj.closeAverageResponsePresenter();
@@ -87,9 +78,10 @@ classdef MainGraphPresenter < Presenter
             
             v = obj.view;
             v.setTitleText(s.protocol.numEpochsCompleted, s.protocol.numberOfEpochs, s.protocol.tostr(), s.getDeviceInfo(epoch));
-            chs = s.getActiveChannels();
+            
+            chs = s.activeChannels;
             for i = 1:length(chs)
-                [x, y, props] = s.getReponse(chs{i}, epoch);
+                [x, y, props] = s.getCurrentEpoch(chs{i}, epoch);
                 v.plot(x, y, 'color', props('color'));
                 [x1, y1, threshold] = s.getSpike(chs{i}, epoch);
                 s.computeAverage(chs{i}, epoch);
@@ -98,9 +90,11 @@ classdef MainGraphPresenter < Presenter
             end
             v.resetGraph();
             v.renderGraph();
+            s.epochId = s.epochId + 1;
             
             obj.showAverageResponse();
             obj.showPSTHResponse();
+            
         end
         
         function closeAverageResponsePresenter(obj, ~, ~)
