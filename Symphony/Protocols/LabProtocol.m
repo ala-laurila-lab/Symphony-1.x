@@ -94,6 +94,9 @@ classdef LabProtocol < SymphonyProtocol
         end
         
         function setMotorizedNdf(obj)
+            if isnan(obj.motorizedNdf)
+                return;
+            end
             wheelName = obj.motorizedNdf(end);
             ndfValue = obj.motorizedNdf(2 : end -1);
             
@@ -104,7 +107,7 @@ classdef LabProtocol < SymphonyProtocol
             wheelObj.setNDF(str2double(ndfValue));
             
             if ~ isempty(obj.ndfConfiguration)
-                    obj.ndfConfiguration.updateCurrentNdfText(char(config));
+                obj.ndfConfiguration.updateCurrentNdfText(char(config));
             end
         end
         

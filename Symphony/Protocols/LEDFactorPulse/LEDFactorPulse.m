@@ -108,7 +108,12 @@ classdef LEDFactorPulse < LabProtocol
             epoch.addStimulus(obj.StimulusLED, obj.ledStimulus(obj.StimulusLED));
             epoch.addParameter('pulseAmplitude', obj.pulseAmplitude + obj.LEDBackground);%DT
             epoch.addParameter('backgroundAmplitude', obj.LEDBackground);%DT
-            epoch.addParameter('NDFs', strcat(obj.motorizedNdf, ',', obj.fixedNdfs));
+            
+            if isnan(obj.motorizedNdf)
+                epoch.addParameter('NDFs', obj.fixedNdfs);
+            else
+                epoch.addParameter('NDFs', strcat(obj.motorizedNdf, ',', obj.fixedNdfs));
+            end
             
             if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
