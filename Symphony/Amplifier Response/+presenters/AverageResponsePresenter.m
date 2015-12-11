@@ -41,9 +41,9 @@ classdef AverageResponsePresenter < Presenter
             obj.averageService = service;
         end
         
-        % Desc - check for the selected channel & stimuls index 
+        % Desc - check for the selected channel & stimuls index
         % collect all plot handles for average response and return the same
-        % 
+        %
         % Reason - On activate of hold grap button, the current state of
         % active graph should be persisted and should be displayed on
         % concurrent epochs, see @holdResponse @viewAverageResponseForChannels
@@ -83,17 +83,21 @@ classdef AverageResponsePresenter < Presenter
         function viewAllAverageResponse(obj, ~, ~)
             v = obj.view;
             tf = v.hasAllVoltagesChecked();
+            if ~tf
+                obj.view.clearGraph();
+                obj.view.resetGraph();
+            end
             v.setAllVoltages(tf);
             obj.viewAverageResponse();
         end
         
         % Get the current state of graph handles and store in
-        % averageService cache with key as 'amp1-10-hold' 
+        % averageService cache with key as 'amp1-10-hold'
         % Key description - channel with stimuls is on hold for graphical
         % display
         
         function holdResponse(obj, ~, ~)
-      
+            
             [handles, channel, idx] = obj.getGraphHandles();
             for i = 1:length(handles)
                 obj.averageService([channel '-' int2str(idx(i)) '-hold']) =  handles{i};
@@ -101,10 +105,10 @@ classdef AverageResponsePresenter < Presenter
         end
         
         function clearHoldResponse(obj, ~, ~)
-             holdingGraphs = setdiff(obj.averageService.keys, obj.channels);
-             remove(obj.averageService, holdingGraphs);
-             obj.view.clearGraph();
-             obj.view.resetGraph();
+            holdingGraphs = setdiff(obj.averageService.keys, obj.channels);
+            remove(obj.averageService, holdingGraphs);
+            obj.view.clearGraph();
+            obj.view.resetGraph();
         end
     end
 end

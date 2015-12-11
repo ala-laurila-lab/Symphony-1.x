@@ -108,6 +108,7 @@ classdef LEDFactorPulse < LabProtocol
             epoch.addStimulus(obj.StimulusLED, obj.ledStimulus(obj.StimulusLED));
             epoch.addParameter('pulseAmplitude', obj.pulseAmplitude + obj.LEDBackground);%DT
             epoch.addParameter('backgroundAmplitude', obj.LEDBackground);%DT
+            epoch.addParameter('NDFs', strcat(obj.motorizedNdf, ',', obj.fixedNdfs));
             
             if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
@@ -228,8 +229,8 @@ classdef LEDFactorPulse < LabProtocol
         
         function str = tostr(obj)
             stimulsAmplitude = obj.storedPulseAmplitudeAndBackground{obj.numEpochsCompleted};
-            str = sprintf('%d mv - (%d - %d Int - %d Reps) Hold - %d',...
-                stimulsAmplitude, obj.initialPulseAmplitude, roundn(obj.numberOfIntensities, -2), obj.numberOfRepeats, obj.ampHoldSignal);
+            str = sprintf('%s mv - (%s - %s Int - %d Reps) Hold - %d',...
+               num2str(stimulsAmplitude), num2str(obj.initialPulseAmplitude), num2str(obj.numberOfIntensities), obj.numberOfRepeats, obj.ampHoldSignal);
         end
         
         function tf = isequal(obj, other)

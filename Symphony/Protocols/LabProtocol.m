@@ -13,15 +13,20 @@ classdef LabProtocol < SymphonyProtocol
         graphing = true
         deviceBackgrounds = {}
         amplifierResponses = []
+        ndfConfiguration = []
     end
     
     properties (Constant, Hidden)
         timeString = 'HH:MM:SS-dd/mm/yy';
         logTab = '      ';
     end
+    
     properties
         ampMode
+        fixedNdfs
+        motorizedNdf
     end
+    
     methods
         %% Overridden Functions
         function p = parameterProperty(obj, parameterName)
@@ -32,8 +37,10 @@ classdef LabProtocol < SymphonyProtocol
             switch parameterName
                 case 'ampMode'
                     p.defaultValue ={'Cell attached','Whole cell'};
+                case 'motorizedNdf'
+                    p.defaultValue = FilterWheelConfig.getMotorizedNdfIdsByRigName(obj.rigConfig.RIG_NAME);
             end
-
+            
             if ~p.units
                 p.units = '';
             end
@@ -44,16 +51,69 @@ classdef LabProtocol < SymphonyProtocol
             
             if obj.rigConfig.isRigSwitch()
                 obj.SymphRigSwitches = SymphonyRigSwitches(obj, rigConfig, obj.symphonyUI);
-            end     
+            end
             
             if ~isempty(obj.SymphRigSwitches)
                 obj.SymphRigSwitches.checkStatus();
-            end               
+            end
         end
+        
+        function ndfs = get.fixedNdfs(obj)
+            manualWheels = @(config) config.active == true && config.motorized == false;
+            config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
+            
+            ndfs = cell(1, numel(config));
+            for i = 1:numel(config)
+                wheelObj = obj.rigConfig.filterWheels(char(config(i)));
+                ndfs{i} = wheelObj.getNDFIdentifier();
+            end
+            ndfs = strjoin(ndfs,',');
+        end
+        
+        function obj = set.fixedNdfs(obj, value)
+            if isempty(value) || sum(isnan(value))
+                return
+            end
+            
+            manualWheels = @(config) config.active == true && config.motorized == false;
+            config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
+            ndfIds = strsplit(value, ',');
+            ndfMap = containers.Map(cellfun(@(ndf) ndf(end), ndfIds, 'UniformOutput', false),...
+                                    cellfun(@(ndf)  ndf(2:end-1), ndfIds, 'UniformOutput', false));
+            
+            for i = 1:numel(config)
+                k = char(config(i));
+                wheelObj = obj.rigConfig.filterWheels(k);
+                ndfValue = ndfMap(k(end));
+                wheelObj.setNDF(str2double(ndfValue));
+                
+                if ~ isempty(obj.ndfConfiguration)
+                    obj.ndfConfiguration.updateCurrentNdfText(k);
+                end
+            end
+        end
+        
+        function setMotorizedNdf(obj)
+            wheelName = obj.motorizedNdf(end);
+            ndfValue = obj.motorizedNdf(2 : end -1);
+            
+            motorized = @(config) config.active == true && config.motorized == true && config.wheelName == wheelName;
+            config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, motorized);
+            
+            wheelObj = obj.rigConfig.filterWheels(char(config));
+            wheelObj.setNDF(str2double(ndfValue));
+            
+            if ~ isempty(obj.ndfConfiguration)
+                    obj.ndfConfiguration.updateCurrentNdfText(char(config));
+            end
+        end
+        
         
         function prepareRun(obj)
             prepareRun@SymphonyProtocol(obj);
-            obj.sendToLog('');            
+            obj.setMotorizedNdf();
+            
+            obj.sendToLog('');
             
             if ~isempty(obj.GraphingPrePoints) && obj.graphing
                 obj.GraphingPrePoints.clearFigure();
@@ -62,15 +122,15 @@ classdef LabProtocol < SymphonyProtocol
             if ~isempty(obj.GraphingAmplifierResponses) && obj.graphing
                 obj.GraphingAmplifierResponses.clearFigure();
             end
-
+            
             if ~isempty(obj.SymphRigSwitches)
                 obj.SymphRigSwitches.checkStatus();
-            end   
+            end
             
             if obj.loggingIsValid
                 formatSpec = '%s%s';
                 s = sprintf(formatSpec, obj.displayName,obj.logTab);
-                                
+                
                 if isprop(obj, 'preRunPropertiesToLog')
                     s = obj.logProperties('preRunPropertiesToLog', s);
                 end
@@ -84,21 +144,21 @@ classdef LabProtocol < SymphonyProtocol
                         mode = [mode multiclampDev{d} '-' obj.rigConfig.getAmpMode(multiclampDev{d}) obj.logTab ];
                     end
                     formatSpec = '%s%s%s';
-                    s = sprintf(formatSpec, s, obj.logTab, mode);                     
+                    s = sprintf(formatSpec, s, obj.logTab, mode);
                 else
                     mode = obj.rigConfig.getAmpMode(obj.amp);
                     formatSpec = '%s%s%s-%s';
-                    s = sprintf(formatSpec, s, obj.logTab, obj.amp, char(mode));                    
-                end 
-                                
+                    s = sprintf(formatSpec, s, obj.logTab, obj.amp, char(mode));
+                end
+                
                 
                 
                 fieldNames = fieldnames(obj.deviceBackgrounds);
                 for d = 1:numel(fieldNames)
-                   formatSpec = '%s%s%s:%s';
-                   s = sprintf(formatSpec, s,obj.logTab, fieldNames{d}, obj.deviceBackgrounds.(fieldNames{d}));
+                    formatSpec = '%s%s%s:%s';
+                    s = sprintf(formatSpec, s,obj.logTab, fieldNames{d}, obj.deviceBackgrounds.(fieldNames{d}));
                 end
-
+                
                 if ~isempty(obj.SolutionController)
                     obj.SolutionControllerStatusString = '';
                     status = obj.SolutionController.getStatus();
@@ -116,35 +176,34 @@ classdef LabProtocol < SymphonyProtocol
         
         function prepareEpoch(obj, epoch)
             prepareEpoch@SymphonyProtocol(obj, epoch);
-            
         end
         
         function completeEpoch(obj, epoch)
             completeEpoch@SymphonyProtocol(obj, epoch);
             %epoch.addParameter('numberOfEpochsCompleted', obj.numEpochsCompleted);%DT
-            
+          
             if ~isempty(obj.SolutionController)
                 epoch.addParameter('SolutionController', obj.SolutionControllerStatusString);
             end
-
+            
             if isprop(obj, 'pulseAmplitude') && isprop(obj, 'storedPulseAmplitudeAndBackground')
                 amplitude = obj.storedPulseAmplitudeAndBackground{obj.numEpochsCompleted};
                 epoch.addParameter('StimAmp', amplitude);
-            end        
+            end
             
             if isprop(obj, 'epochsInSet') && isprop(obj, 'numberOfIntensities')
                 obj.epochsInSet = obj.epochsInSet + 1;
                 
                 if obj.epochsInSet == obj.numberOfIntensities
-                   obj.epochsInSet = 0; 
+                    obj.epochsInSet = 0;
                 end
             end
-
+            
             if obj.rigConfig.isDevice('HeatController')%DT
                 temp = obj.recordSolutionTemp(epoch);
                 epoch.addParameter('Temp', temp);
             end
-
+            
             if obj.loggingIsValid
                 formatSpec = '%u%s%u:%u:%u';
                 s = sprintf(formatSpec, ...
@@ -160,33 +219,33 @@ classdef LabProtocol < SymphonyProtocol
                     s = sprintf(formatSpec, s, obj.logTab, optometer);
                     epoch.addParameter('Optometer', optometer);
                 end
- 
+                
                 if ~isempty(amplitude)
                     formatSpec = '%s%sStimAmp:%gmV';
                     s = sprintf(formatSpec, s, obj.logTab, amplitude);
                 end
-
+                
                 if obj.rigConfig.isDevice('HeatController')
                     formatSpec = '%s%sTemp:%gC';
                     %temp = obj.recordSolutionTemp(epoch);
                     s = sprintf(formatSpec, s, obj.logTab, temp);
                     %epoch.addParameter('Temp', temp + 'C');
                 end
-                                
+                
                 if isprop(obj, 'postEpochLogging')
                     s = obj.logProperties('postEpochLogging', s);
-                end  
+                end
                 
                 obj.sendToLog(s);
             end
             
             if ~isempty(obj.GraphingPrePoints) && obj.graphing
                 obj.GraphingPrePoints.handleEpoch(epoch);
-            end      
+            end
             
             if ~isempty(obj.GraphingAmplifierResponses) && obj.graphing
                 obj.GraphingAmplifierResponses.handleEpoch(epoch);
-            end       
+            end
             
             if ~isempty(obj.SymphRigSwitches)
                 if isempty(obj.rigSwitchNames)
@@ -197,10 +256,10 @@ classdef LabProtocol < SymphonyProtocol
                     obj.SymphRigSwitches.switchesChanged(epoch.response(obj.rigSwitchNames{s}),s);
                 end
             end
-
+            
             if ~isempty(obj.amplifierResponses)
                 obj.amplifierResponses.handleEpoch(epoch);
-            end       
+            end
         end
         
         function completeRun(obj)
@@ -211,8 +270,8 @@ classdef LabProtocol < SymphonyProtocol
                 fieldNames = fieldnames(obj.deviceBackgrounds);
                 channelNames = fieldNames(strncmp('Ch',fieldNames,2));
                 for d = 1:numel(channelNames)
-                   formatSpec = '%sLED %s : %s%s';
-                   s = sprintf(formatSpec, s, channelNames{d}, obj.deviceBackgrounds.(channelNames{d}), obj.logTab);
+                    formatSpec = '%sLED %s : %s%s';
+                    s = sprintf(formatSpec, s, channelNames{d}, obj.deviceBackgrounds.(channelNames{d}), obj.logTab);
                 end
                 obj.sendToLog(s);
                 obj.sendToLog(sprintf('\n'));
@@ -224,59 +283,67 @@ classdef LabProtocol < SymphonyProtocol
         function openModules(obj)
             for m = 1:numel(obj.symphonyUI.modules)
                 module = obj.symphonyUI.modules{m};
-                obj.moduleRegister(module.displayName,module);            
+                obj.moduleRegister(module.displayName,module);
             end
         end
-
+        
         function moduleRegister(obj, displayName, module)
             if strcmp(displayName, 'Notepad') && isempty(obj.notepad)
                 obj.notepad = module;
             end
-
+            
             if strcmp(displayName, 'Solution Controller') && isempty(obj.SolutionController)
                 obj.SolutionController = module;
             end
-
+            
             if strcmp(displayName, 'Graphing Pre Points') && isempty(obj.GraphingPrePoints)
                 obj.GraphingPrePoints = module;
             end
-
+            
             if strcmp(displayName, 'Graphing Amplifier Response') && isempty(obj.GraphingAmplifierResponses)
                 obj.GraphingAmplifierResponses = module;
-            end   
-
+            end
+            
             if strcmp(displayName, 'Amplifier Response')
                 obj.amplifierResponses = module;
-            end               
-        end        
+            end
+            
+            if strcmp(displayName, 'NDFConfiguration')
+                obj.ndfConfiguration = module;
+            end
+        end
         
         function moduleUnRegister(obj, displayName)
             if strcmp(displayName, 'Notepad')
                 obj.notepad = [];
             end
-
+            
             if strcmp(displayName, 'Solution Controller')
                 obj.SolutionController = [];
             end
-
+            
             if strcmp(displayName, 'Graphing Pre Points')
                 obj.GraphingPrePoints = [];
             end
-
+            
             if strcmp(displayName, 'Graphing Amplifier Response')
                 obj.GraphingAmplifierResponses = [];
-            end   
-
+            end
+            
             if strcmp(displayName, 'Amplifier Response')
                 obj.amplifierResponses = [];
-            end                
-        end        
+            end
+            
+            if strcmp(displayName, 'NDFConfiguration')
+                obj.ndfConfiguration = [];
+            end
+        end
         
         %% Multiclamp Functions
         function applyAmpHoldSignal(obj)
             obj.setDeviceBackground(obj.amp, obj.ampHoldSignal, obj.rigConfig.getAmpUnits(obj.amp));
         end
-                  
+        
         function sendToLog(obj,s)
             if obj.loggingIsValid
                 obj.notepad.log(s);
@@ -304,7 +371,7 @@ classdef LabProtocol < SymphonyProtocol
                     
                     parameter = obj.parameterProperty(property{f});
                     s = sprintf(formatSpec,s,property{f},value,parameter.units,obj.logTab);
-                end                
+                end
             end
         end
         

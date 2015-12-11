@@ -3,8 +3,14 @@ classdef Multiclamp < LabRigConfiguration
     properties (Constant)
         displayName = 'Multiclamp'
         numberOfRigSwitches = 4;
+        RIG_DESC = 'Viiki Patch Rig'
+        RIG_NAME = 'A'
     end
     
+    properties(SetAccess = private)
+        filterWheels = containers.Map();
+    end
+
     methods   
         %% Note: The names of the devices are important, the can not be changed!
         function createDevices(obj)
@@ -39,6 +45,13 @@ classdef Multiclamp < LabRigConfiguration
             
             %% Adding the TTL Trigger
             obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.0', '');
+            % Adding filter wheel configuration
+
+            wheelconfigs = FilterWheelConfig.listByRigName(obj.RIG_NAME);
+            for i = 1:numel(wheelconfigs)
+                config = wheelconfigs(i);
+                obj.filterWheels(char(config)) = FilterWheel(config);
+            end
         end 
     end
 end

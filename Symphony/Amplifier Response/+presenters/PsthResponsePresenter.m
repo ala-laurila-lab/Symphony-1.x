@@ -20,6 +20,10 @@ classdef PsthResponsePresenter < Presenter
             obj.addListener(v, 'ShowAllPsthResponse', @obj.viewAllPsthResponse);
         end
         
+        function onGo(obj)
+            obj.viewAllPsthResponse();
+        end
+        
         function onStopping(obj)
             v = obj.view;
             v.saveFigureHandlePosition();
@@ -60,6 +64,10 @@ classdef PsthResponsePresenter < Presenter
         function viewAllPsthResponse(obj, ~, ~)
             v = obj.view;
             tf = v.hasAllVoltagesChecked();
+            if ~tf
+                obj.view.clearGraph();
+                obj.view.resetGraph();
+            end
             v.setAllVoltages(tf);
             obj.viewPsthResponse();
         end
