@@ -14,6 +14,7 @@ classdef LabProtocol < SymphonyProtocol
         deviceBackgrounds = {}
         amplifierResponses = []
         ndfConfiguration = []
+        motorizedWheelConfig;
     end
     
     properties (Constant, Hidden)
@@ -38,7 +39,12 @@ classdef LabProtocol < SymphonyProtocol
                 case 'ampMode'
                     p.defaultValue ={'Cell attached','Whole cell'};
                 case 'motorizedNdf'
-                    p.defaultValue = FilterWheelConfig.getMotorizedNdfIdsByRigName(obj.rigConfig.RIG_NAME);
+                    motorizedWheels = @(config) config.active == true && config.motorized == true;
+                    config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, motorizedWheels);
+                    if ~isempty(config)
+                        obj.motorizedWheelConfig = config(1);
+                        p.defaultValue = cellfun(@(k) strcat(configs(1).rigName, k ), config(1).ndfContainer.keys, 'UniformOutput', false);
+                    end
             end
             
             if ~p.units
@@ -74,21 +80,23 @@ classdef LabProtocol < SymphonyProtocol
             if isempty(value) || sum(isnan(value))
                 return
             end
-            
-            manualWheels = @(config) config.active == true && config.motorized == false;
-            config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
+           
             ndfIds = strsplit(value, ',');
-            ndfMap = containers.Map(cellfun(@(ndf) ndf(end), ndfIds, 'UniformOutput', false),...
-                                    cellfun(@(ndf)  ndf(2:end-1), ndfIds, 'UniformOutput', false));
+            ndfNames = cellfun(@(ndf) ndf(2, end), ndfIds, 'UniformOutput', false);
+           
+            manualWheels = @(config) config.active == true && config.motorized == false;
+            configs = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
             
-            for i = 1:numel(config)
-                k = char(config(i));
-                wheelObj = obj.rigConfig.filterWheels(k);
-                ndfValue = ndfMap(k(end));
-                wheelObj.setNDF(str2double(ndfValue));
-                
-                if ~ isempty(obj.ndfConfiguration)
-                    obj.ndfConfiguration.updateCurrentNdfText(k);
+            for i = 1:numel(configs)
+                 key = char(configs{i});
+                 ndfName = ndfNames(isKey(configs{i}.ndfContainer, ndfNames));
+                 if ~ isempty(ndfName)
+                    wheelObj = obj.rigConfig.filterWheels(key);   
+                    wheelObj.setNDF(ndfName);
+                 end
+                 
+                 if ~ isempty(obj.ndfConfiguration)
+                    obj.ndfConfiguration.updateCurrentNdfText(key);
                 end
             end
         end
@@ -97,15 +105,11 @@ classdef LabProtocol < SymphonyProtocol
             if isnan(obj.motorizedNdf)
                 return;
             end
-            wheelName = obj.motorizedNdf(end);
-            ndfValue = obj.motorizedNdf(2 : end -1);
-            
-            motorized = @(config) config.active == true && config.motorized == true && config.wheelName == wheelName;
-            config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, motorized);
-            
-            wheelObj = obj.rigConfig.filterWheels(char(config));
-            wheelObj.setNDF(str2double(ndfValue));
-            
+            config = char(obj.motorizedWheelConfig);
+            ndfValue = obj.motorizedNdf(2 : end);
+            wheelObj = obj.rigConfig.filterWheels(config);
+            wheelObj.setNDF(ndfValue);
+
             if ~ isempty(obj.ndfConfiguration)
                 obj.ndfConfiguration.updateCurrentNdfText(char(config));
             end

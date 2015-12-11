@@ -12,11 +12,11 @@ classdef FilterWheelConfig
     
     methods
         
-        function obj = FilterWheelConfig(rigName, wheelName, ndfValues, ndfPositions, port, motorized, active)
+        function obj = FilterWheelConfig(rigName, wheelName, ndfNames, ndfPositions, port, motorized, active)
             obj.rigName = rigName;
             obj.wheelName = wheelName;
-            obj.ndfContainer = containers.Map(ndfValues, ndfPositions);
-            obj.posContainer = containers.Map(ndfPositions, ndfValues);
+            obj.ndfContainer = containers.Map(ndfNames, ndfPositions);
+            obj.posContainer = containers.Map(ndfPositions, ndfNames);
             obj.port = port;
             obj.motorized = motorized;
             obj.active = active;
@@ -38,23 +38,11 @@ classdef FilterWheelConfig
                 end
             end
         end
-
-        function ndfIds = getMotorizedNdfIdsByRigName(name)
-            configs = enumeration('FilterWheelConfig');
-            ndfIds = [];
-            for i = 1:numel(configs)
-                if strcmpi(configs(i).rigName, name) && configs(i).active == true && configs(i).motorized == true
-                    ndfId = cellfun(@(k) strcat(configs(i).rigName, num2str(k), configs(i).wheelName), configs(i).ndfContainer.keys, 'UniformOutput', false);
-                    ndfIds = [ndfIds, ndfId]; %#ok
-                end
-            end
-        end
     end
     
     enumeration
-        
-        PATCH_RIG_VIIKKI_A('A', 'A', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6], [1, 2, 3, 4, 5, 6],  'COM18', false, true);
-        PATCH_RIG_VIIKKI_B('A', 'B', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6], [1, 2, 3, 4, 5, 6], 'Manual', false, true);
+        VIIKKI_PATCH_RIG_WHEEL_1('A', 'wheel_1', {'0.1A', '0.2A', '0.3A', '0.3B', '0.4A', '0.5A'}, [1, 2, 3, 4, 5, 6],  'COM18', false, true);
+        VIIKKI_PATCH_RIG_WHEEL_2('A', 'wheel_2', {'0.1B', '0.2B', '0.3C', '0.4B', '0.5B', '0.6A'}, [1, 2, 3, 4, 5, 6], 'Manual', false, true);
     end
 end
 

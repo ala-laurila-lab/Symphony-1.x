@@ -40,7 +40,7 @@ classdef NDFConfiguration  < Module
             end
             idx = get(obj.selectedNdfsMap(wheelConfig), 'Value');
             ndfs = get(obj.selectedNdfsMap(wheelConfig), 'String');
-            ndf = str2double(ndfs(idx));
+            ndf = ndfs(idx);
         end
         
         
@@ -56,7 +56,7 @@ classdef NDFConfiguration  < Module
                 wheelConfig = char(wheelConfig);
             end
             wheel = obj.filterWheelsMap(wheelConfig);
-            set(obj.currentNdfTextMap(wheelConfig), 'String', sprintf('Current density - %0.3f', wheel.getNDF()));
+            set(obj.currentNdfTextMap(wheelConfig), 'String', strcat('Current density -', wheel.getNDF()));
         end
         
         function createUi(obj)
@@ -100,7 +100,7 @@ classdef NDFConfiguration  < Module
                 if isempty(lastNdf)
                     ndfText = 'current density - NA';
                 else
-                    ndfText = sprintf('Current density - %.3f', lastNdf);
+                    ndfText = strcat('Current density - ', lastNdf);
                 end
                 
                 obj.currentNdfTextMap(key)= uicontrol(...,

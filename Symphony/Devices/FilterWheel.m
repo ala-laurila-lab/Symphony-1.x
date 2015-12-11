@@ -18,7 +18,7 @@ classdef FilterWheel < handle
         function setNDF(obj, ndf)
             
             if ~isKey(obj.wheelConfig.ndfContainer, ndf)
-                disp(['Error: filter value ' num2str(ndf) ' not found']);
+                disp(['Error: filter value ' ndf ' not found']);
                 return;
             end
             
@@ -57,7 +57,7 @@ classdef FilterWheel < handle
         end
         
         function str = getNDFIdentifier(obj)
-            str = [obj.wheelConfig.rigName num2str(obj.getNDF()) obj.wheelConfig.wheelName];
+            str = [obj.wheelConfig.rigName obj.getNDF()];
         end
         
         function ndf = getNDF(obj)
