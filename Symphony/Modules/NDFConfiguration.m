@@ -122,7 +122,7 @@ classdef NDFConfiguration  < Module
                     'String', ndfs);
                 
                 if ~ isempty(lastNdf)
-                    set(obj.selectedNdfsMap(key), 'Value', find(cellfun(@(ndf) ndf == lastNdf, ndfs)==1));
+                    set(obj.selectedNdfsMap(key), 'Value', find(cellfun(@(ndf) strcmp(ndf,lastNdf), ndfs)==1));
                 end
                 
                 buttonTxt = 'SET';

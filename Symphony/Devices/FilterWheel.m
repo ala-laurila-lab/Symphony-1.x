@@ -57,7 +57,11 @@ classdef FilterWheel < handle
         end
         
         function str = getNDFIdentifier(obj)
-            str = [obj.wheelConfig.rigName obj.getNDF()];
+            if isempty(obj.getNDF())
+               str = 'NA'; 
+               return;
+            end
+            str = strcat(obj.wheelConfig.rigName, obj.getNDF());
         end
         
         function ndf = getNDF(obj)

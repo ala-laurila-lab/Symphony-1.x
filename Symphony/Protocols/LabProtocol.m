@@ -43,7 +43,7 @@ classdef LabProtocol < SymphonyProtocol
                     config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, motorizedWheels);
                     if ~isempty(config)
                         obj.motorizedWheelConfig = config(1);
-                        p.defaultValue = cellfun(@(k) strcat(configs(1).rigName, k ), config(1).ndfContainer.keys, 'UniformOutput', false);
+                        p.defaultValue = cellfun(@(k) strcat(config(1).rigName, k ), config(1).ndfContainer.keys, 'UniformOutput', false);
                     end
             end
             
@@ -68,10 +68,10 @@ classdef LabProtocol < SymphonyProtocol
             manualWheels = @(config) config.active == true && config.motorized == false;
             config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
             
-            ndfs = cell(1, numel(config));
+            ndfs = [];
             for i = 1:numel(config)
                 wheelObj = obj.rigConfig.filterWheels(char(config(i)));
-                ndfs{i} = wheelObj.getNDFIdentifier();
+                ndfs = [ndfs, wheelObj.getNDFIdentifier()];
             end
             ndfs = strjoin(ndfs,',');
         end
@@ -80,16 +80,14 @@ classdef LabProtocol < SymphonyProtocol
             if isempty(value) || sum(isnan(value))
                 return
             end
-           
             ndfIds = strsplit(value, ',');
-            ndfNames = cellfun(@(ndf) ndf(2, end), ndfIds, 'UniformOutput', false);
-           
+            ndfNames = cellfun(@(ndf) ndf(2:end), ndfIds, 'UniformOutput', false);
             manualWheels = @(config) config.active == true && config.motorized == false;
             configs = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
             
             for i = 1:numel(configs)
-                 key = char(configs{i});
-                 ndfName = ndfNames(isKey(configs{i}.ndfContainer, ndfNames));
+                 key = char(configs(i));
+                 ndfName = ndfNames(isKey(configs(i).ndfContainer, ndfNames));
                  if ~ isempty(ndfName)
                     wheelObj = obj.rigConfig.filterWheels(key);   
                     wheelObj.setNDF(ndfName);
