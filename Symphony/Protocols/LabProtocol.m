@@ -24,8 +24,11 @@ classdef LabProtocol < SymphonyProtocol
     
     properties
         ampMode
-        fixedNdfs
         motorizedNdf
+    end
+    
+    properties(Dependent)
+        fixedNdfs
     end
     
     methods
@@ -68,10 +71,10 @@ classdef LabProtocol < SymphonyProtocol
             manualWheels = @(config) config.active == true && config.motorized == false;
             config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
             
-            ndfs = [];
+            ndfs = {};
             for i = 1:numel(config)
                 wheelObj = obj.rigConfig.filterWheels(char(config(i)));
-                ndfs = [ndfs, wheelObj.getNDFIdentifier()];
+                ndfs{i} = char(wheelObj.getNDFIdentifier());
             end
             ndfs = strjoin(ndfs,',');
         end
@@ -107,7 +110,10 @@ classdef LabProtocol < SymphonyProtocol
             ndfValue = obj.motorizedNdf(2 : end);
             wheelObj = obj.rigConfig.filterWheels(config);
             wheelObj.setNDF(ndfValue);
-
+            currentNDF = wheelObj.getNDF();
+            if ~ strcmp(currentNDF, ndfValue)
+                error('motorized filter wheel is not working !');
+            end
             if ~ isempty(obj.ndfConfiguration)
                 obj.ndfConfiguration.updateCurrentNdfText(char(config));
             end

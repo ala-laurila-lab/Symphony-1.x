@@ -27,7 +27,7 @@ classdef FilterWheel < handle
                 return
             end
             
-            pos = obj.wheelConfig.ndfContainer(ndf);
+            pos = obj.wheelConfig.ndfContainer(char(ndf));
             if pos ~= obj.getPosition()
                 fopen(obj.com);
                 fprintf(obj.com, ['pos=' num2str(pos) '\n']);
@@ -58,7 +58,7 @@ classdef FilterWheel < handle
         
         function str = getNDFIdentifier(obj)
             if isempty(obj.getNDF())
-               str = 'NA'; 
+               str = ['NA']; 
                return;
             end
             str = strcat(obj.wheelConfig.rigName, obj.getNDF());

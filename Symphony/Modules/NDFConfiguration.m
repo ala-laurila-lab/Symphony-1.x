@@ -123,6 +123,10 @@ classdef NDFConfiguration  < Module
                 
                 if ~ isempty(lastNdf)
                     set(obj.selectedNdfsMap(key), 'Value', find(cellfun(@(ndf) strcmp(ndf,lastNdf), ndfs)==1));
+                else
+                    set(obj.selectedNdfsMap(key), 'Value', 1);
+                    wheel.setNDF(char(ndfs{1}));
+                    obj.updateCurrentNdfText(key);
                 end
                 
                 buttonTxt = 'SET';
