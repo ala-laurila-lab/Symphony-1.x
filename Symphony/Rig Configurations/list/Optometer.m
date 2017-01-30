@@ -1,7 +1,7 @@
-classdef Multiclamp < LabRigConfiguration
+classdef Optometer < LabRigConfiguration
     
     properties (Constant)
-        displayName = 'Multiclamp'
+        displayName = 'Optometer'
         numberOfRigSwitches = 4;
         RIG_DESC = 'Viiki Patch Rig'
         RIG_NAME = 'A'
@@ -25,7 +25,7 @@ classdef Multiclamp < LabRigConfiguration
             obj.addDevice('HeatController', '', 'ANALOG_IN.2');
 
             %% Adding the Optometer
-            % obj.addDevice('Optometer', '', 'ANALOG_IN.3'); %Uncomment if you are using the optometer, make sure the correcct channel is being used
+            obj.addDevice('Optometer', '', 'ANALOG_IN.3'); %Uncomment if you are using the optometer, make sure the correcct channel is being used
             
             %% Adding the Rig Switches
             obj.addDevice('Rig_Switches_0','', 'DIGITAL_IN.0');  % input only
