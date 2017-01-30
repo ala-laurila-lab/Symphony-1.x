@@ -129,7 +129,7 @@ classdef Notepad < Module
                 commentBanner = sprintf('***************************************************');
 
                 obj.log(commentBanner);
-                obj.log(char(comment));
+                obj.log(strcat(datestr(now, 'HH:MM:SS'), '- ',char(comment)));
                 obj.log(commentBanner);
 
                 obj.saveAsFcn();
@@ -293,7 +293,7 @@ classdef Notepad < Module
            rows=size(s,1);
             for row=1:rows
                 obj.controls.jEditbox.setCaretPosition(obj.controls.jEditbox.getDocument().getLength());
-                obj.controls.jEditbox.replaceSelection(sprintf('%s\n',s(row,:)));
+                obj.controls.jEditbox.replaceSelection(sprintf('%s \n', s(row,:)));
             end
         end
     end
