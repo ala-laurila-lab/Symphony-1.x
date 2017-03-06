@@ -301,6 +301,8 @@ classdef Notepad < Module
                     obj.runningEpochNumber = 0;
                     obj.previousPersistorPath = obj.symphonyUI.persistPath;
                     obj.firstEpochStartTime = datevec(runningEpochTime, 'HH:MM:SS');
+                    [~, fname, ~] = fileparts(obj.symphonyUI.persistPath);
+                    obj.log(['cell name ' fname]);
                 end
                 obj.runningEpochNumber = obj.runningEpochNumber + 1;
                 obj.relativeEpochTime = etime(datevec(runningEpochTime, 'HH:MM:SS') ,obj.firstEpochStartTime);
