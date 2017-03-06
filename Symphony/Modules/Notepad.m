@@ -296,14 +296,22 @@ classdef Notepad < Module
             
             % ideally persistPath should not be empty, as logging file
             % enabled only after valid persistor
-            
-            if  isempty(obj.previousPersistorPath) || ~ strcmp(obj.previousPersistorPath, obj.symphonyUI.persistPath)
-                obj.runningEpochNumber = 0;
-                obj.previousPersistorPath = obj.symphonyUI.persistPath;
-                obj.firstEpochStartTime = datetime(runningEpochTime, 'format', 'HH:mm:ss');
+            try
+                if isempty(obj.previousPersistorPath) || ~ strcmp(obj.previousPersistorPath, obj.symphonyUI.persistPath)
+                    obj.runningEpochNumber = 0;
+                    obj.previousPersistorPath = obj.symphonyUI.persistPath;
+                    obj.firstEpochStartTime = datevec(runningEpochTime, 'HH:MM:SS');
+                end
+                obj.runningEpochNumber = obj.runningEpochNumber + 1;
+                obj.relativeEpochTime = etime(datevec(runningEpochTime, 'HH:MM:SS') ,obj.firstEpochStartTime);
+            catch exception
+                % In case of problem ignore the exception and procced with
+                % acquistion
+                disp(exception.message);
+                obj.runningEpochNumber = nan;
+                obj.relativeEpochTime = nan;
             end
-            obj.runningEpochNumber = obj.runningEpochNumber + 1;
-            obj.relativeEpochTime = seconds(datetime(runningEpochTime, 'format', 'HH:mm:ss') - obj.firstEpochStartTime);
+                
         end
         
         %% Logging
