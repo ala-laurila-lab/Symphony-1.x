@@ -11,6 +11,8 @@ classdef Notepad < Module
         headers
         isLogging = true
         currentFileName 
+        runningEpochNumber = 0
+        relativeEpochTime
     end
     
     properties (Constant, Hidden)
@@ -20,6 +22,8 @@ classdef Notepad < Module
     properties (Hidden)
         dateStamp
         controls
+        previousPersistorPath
+        firstEpochStartTime
         userInterfaceEnabled = true
     end
     
@@ -285,11 +289,36 @@ classdef Notepad < Module
         end
                 
         function timestamp = getTimestamp(obj)
-            timestamp = datestr(now, obj.timeString);
+             timestamp = datestr(now, obj.timeString);
+        end
+        
+        function updateRunningEpochNumber(obj, runningEpochTime)
+            
+            % ideally persistPath should not be empty, as logging file
+            % enabled only after valid persistor
+            try
+                if isempty(obj.previousPersistorPath) || ~ strcmp(obj.previousPersistorPath, obj.symphonyUI.persistPath)
+                    obj.runningEpochNumber = 0;
+                    obj.previousPersistorPath = obj.symphonyUI.persistPath;
+                    obj.firstEpochStartTime = datevec(runningEpochTime, 'HH:MM:SS');
+                    [~, fname, ~] = fileparts(obj.symphonyUI.persistPath);
+                    obj.log(['cell name ' fname]);
+                end
+                obj.runningEpochNumber = obj.runningEpochNumber + 1;
+                obj.relativeEpochTime = etime(datevec(runningEpochTime, 'HH:MM:SS') ,obj.firstEpochStartTime);
+            catch exception
+                % In case of problem ignore the exception and procced with
+                % acquistion
+                disp(exception.message);
+                obj.runningEpochNumber = nan;
+                obj.relativeEpochTime = nan;
+            end
+                
         end
         
         %% Logging
         function log( obj, s )
+            
            rows=size(s,1);
             for row=1:rows
                 obj.controls.jEditbox.setCaretPosition(obj.controls.jEditbox.getDocument().getLength());
