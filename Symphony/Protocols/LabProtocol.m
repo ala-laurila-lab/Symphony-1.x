@@ -15,7 +15,7 @@ classdef LabProtocol < SymphonyProtocol
         amplifierResponses = []
         ndfConfiguration = []
         motorizedWheelConfig;
-        ndfCache
+        ndfCache = [];
     end
     
     properties (Constant, Hidden)
@@ -30,9 +30,6 @@ classdef LabProtocol < SymphonyProtocol
     properties (Hidden, Dependent)
         fixedNdfs
         motorizedNdf
-    end
-    
-    properties (Dependent)
         ndfCh1
         ndfCh2
     end
@@ -53,6 +50,7 @@ classdef LabProtocol < SymphonyProtocol
             if ~p.units
                 p.units = '';
             end
+            obj.ndfCache = [];
         end
         
         function obj = init(obj, rigConfig)
