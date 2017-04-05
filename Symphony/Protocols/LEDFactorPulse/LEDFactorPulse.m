@@ -97,10 +97,12 @@ classdef LEDFactorPulse < LabProtocol
             obj.numberOfEpochs = obj.numberOfIntensities * obj.numberOfRepeats;
             obj.finishAfterRepeat = false;
             obj.epochsInSet = 0;
+
         end
         
         function prepareEpoch(obj, epoch)
-            % Call the base method.
+            % Call the base method.'
+
             prepareEpoch@SymphonyProtocol(obj, epoch);
             amplifierMode = obj.rigConfig.multiClampMode(obj.amp);
             epoch.addParameter('amplifierMode', amplifierMode);
@@ -109,11 +111,8 @@ classdef LEDFactorPulse < LabProtocol
             epoch.addParameter('pulseAmplitude', obj.pulseAmplitude + obj.LEDBackground);%DT
             epoch.addParameter('backgroundAmplitude', obj.LEDBackground);%DT
             
-            if isnan(obj.motorizedNdf)
-                epoch.addParameter('NDFs', obj.fixedNdfs);
-            else
-                epoch.addParameter('NDFs', strcat(obj.motorizedNdf, ',', obj.fixedNdfs));
-            end
+            epoch.addParameter('ndfCh1', obj.ndfCh1);
+            epoch.addParameter('ndfCh2', obj.ndfCh2);
             
             if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());

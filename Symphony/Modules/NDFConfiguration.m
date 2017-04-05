@@ -67,7 +67,7 @@ classdef NDFConfiguration  < Module
             n = numel(obj.wheelconfigs);
             
             set(obj.figureHandle, 'DefaultUicontrolFontName', 'Segoe UI');
-            set(obj.figureHandle, 'DefaultUicontrolFontSize', 9);
+            set(obj.figureHandle, 'DefaultUicontrolFontSize', 10);  
             
             layout = uiextras.VBox('Parent', obj.figureHandle);
             uicontrol(...,
@@ -93,6 +93,7 @@ classdef NDFConfiguration  < Module
                 pannel = uiextras.VBox('Parent', dynamicControls);
                 uicontrol(...,
                     'HorizontalAlignment', 'left',...
+                    'FontWeight', 'bold',....
                     'Parent', pannel,...
                     'Style','text',...
                     'String', sprintf('Filter wheel - %s',config.wheelName));

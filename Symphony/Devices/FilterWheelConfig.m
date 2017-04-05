@@ -41,8 +41,10 @@ classdef FilterWheelConfig
     end
     
     enumeration
-        VIIKKI_PATCH_RIG_WHEEL_1('A', 'wheel_1', {'0.3A', '1A', '2A', '3A', '4B', 'Empty'}, [1, 2, 3, 4, 5, 6],  'COM12', true, true);
-        VIIKKI_PATCH_RIG_WHEEL_2('A', 'wheel_2', {'4A', 'None'}, [1, 2], 'Manual', false, true);
+        VIIKKI_PATCH_RIG_WHEEL_1('A', 'Ch1 Motorized', {'0.3A', '1A', '2A', '3A', '4B', 'Empty'}, [1, 2, 3, 4, 5, 6],  'COM12', true, true);
+        VIIKKI_PATCH_RIG_WHEEL_2('A', 'Ch2 Motorized', {'0.3B', '1B', '2B', '3B', '4D', 'Empty'}, [1, 2, 3, 4, 5, 6],  'COM15', true, true);
+        VIIKKI_PATCH_RIG_WHEEL_3('A', 'Ch1 Manual', {'4A', 'None'}, [1, 2], 'Manual', false, true);
+        VIIKKI_PATCH_RIG_WHEEL_4('A', 'Ch2 Manual', {'4C', 'None'}, [1, 2], 'Manual', false, true);
     end
 end
 

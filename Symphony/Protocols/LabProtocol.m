@@ -15,6 +15,7 @@ classdef LabProtocol < SymphonyProtocol
         amplifierResponses = []
         ndfConfiguration = []
         motorizedWheelConfig;
+        ndfCache = [];
     end
     
     properties (Constant, Hidden)
@@ -24,14 +25,17 @@ classdef LabProtocol < SymphonyProtocol
     
     properties
         ampMode
-        motorizedNdf
     end
     
-    properties(Dependent)
+    properties (Hidden, Dependent)
         fixedNdfs
+        motorizedNdf
+        ndfCh1
+        ndfCh2
     end
     
     methods
+        
         %% Overridden Functions
         function p = parameterProperty(obj, parameterName)
             % Call the base method to create the property object.
@@ -41,19 +45,14 @@ classdef LabProtocol < SymphonyProtocol
             switch parameterName
                 case 'ampMode'
                     p.defaultValue ={'Cell attached','Whole cell'};
-                case 'motorizedNdf'
-                    motorizedWheels = @(config) config.active == true && config.motorized == true;
-                    config = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, motorizedWheels);
-                    if ~isempty(config)
-                        obj.motorizedWheelConfig = config(1);
-                        p.defaultValue = cellfun(@(k) strcat(config(1).rigName, k ), config(1).ndfContainer.keys, 'UniformOutput', false);
-                    end
             end
             
             if ~p.units
                 p.units = '';
             end
+            obj.ndfCache = [];
         end
+        
         function obj = init(obj, rigConfig)
             init@SymphonyProtocol(obj, rigConfig);
             obj.openModules();
@@ -79,52 +78,47 @@ classdef LabProtocol < SymphonyProtocol
             ndfs = strjoin(ndfs,',');
         end
         
-        function obj = set.fixedNdfs(obj, value)
-            if isempty(value) || sum(isnan(value))
-                return
-            end
-            ndfIds = strsplit(value, ',');
-            ndfNames = cellfun(@(ndf) ndf(2:end), ndfIds, 'UniformOutput', false);
-            manualWheels = @(config) config.active == true && config.motorized == false;
-            configs = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, manualWheels);
+        function ndfs = get.motorizedNdf(obj)
             
-            for i = 1:numel(configs)
-                 key = char(configs(i));
-                 ndfName = ndfNames(isKey(configs(i).ndfContainer, ndfNames));
-                 if ~ isempty(ndfName)
-                    wheelObj = obj.rigConfig.filterWheels(key);   
-                    wheelObj.setNDF(ndfName);
-                 end
-                 
-                 if ~ isempty(obj.ndfConfiguration)
-                    obj.ndfConfiguration.updateCurrentNdfText(key);
-                end
-            end
-        end
-        
-        function setMotorizedNdf(obj)
-            if isnan(obj.motorizedNdf)
+            if ~ isempty(obj.ndfCache)
+                ndfs = obj.ndfCache;
                 return;
             end
-            config = char(obj.motorizedWheelConfig);
-            ndfValue = obj.motorizedNdf(2 : end);
-            wheelObj = obj.rigConfig.filterWheels(config);
-            wheelObj.setNDF(ndfValue);
-            currentNDF = wheelObj.getNDF();
-            if ~ strcmp(currentNDF, ndfValue)
-                error('motorized filter wheel is not working !');
+            filter = @(config) config.active == true && config.motorized == true;
+            configs = FilterWheelConfig.listByRigName(obj.rigConfig.RIG_NAME, filter);
+            
+            if isempty(configs)
+                ndfs = nan;
+                return;
             end
-            if ~ isempty(obj.ndfConfiguration)
-                obj.ndfConfiguration.updateCurrentNdfText(char(config));
+            
+            ndfs = {};
+            for i = 1 : numel(configs)
+                config = configs(i);
+                wheelObj = obj.rigConfig.filterWheels(char(config));
+                ndfs{end + 1} = strcat(config.rigName, wheelObj.getNDF()); %#ok
             end
+            ndfs = strjoin(ndfs,',');
+            obj.ndfCache = ndfs;
         end
         
+        function ndfs = get.ndfCh1(obj)
+            motorizedNdfs = strsplit(obj.motorizedNdf, ',');
+            fixedNdfs = strsplit(obj.fixedNdfs, ',');
+            ndfs = strcat(motorizedNdfs{1}, ', ', fixedNdfs{1});
+        end
+        
+        function ndfs = get.ndfCh2(obj)
+            motorizedNdfs = strsplit(obj.motorizedNdf, ',');
+            fixedNdfs = strsplit(obj.fixedNdfs, ',');
+            ndfs = strcat(motorizedNdfs{2}, ', ', fixedNdfs{2});
+        end
         
         function prepareRun(obj)
             prepareRun@SymphonyProtocol(obj);
-            obj.setMotorizedNdf();
-            
+                      
             obj.sendToLog('');
+            obj.ndfCache = [];
             
             if ~isempty(obj.GraphingPrePoints) && obj.graphing
                 obj.GraphingPrePoints.clearFigure();
