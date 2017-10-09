@@ -19,6 +19,9 @@ classdef GraphingPrePoints < Module
         varAxes
         meanAxes
         amp
+        previousPersistorPath
+        validEpochNumbers 
+        linePlot
     end
     
     methods
@@ -64,7 +67,8 @@ classdef GraphingPrePoints < Module
             
             set(obj.varAxes,'Color',obj.axesBackgroundColor);
             set(obj.meanAxes,'Color','none');
-            
+            obj.linePlot = false; 
+
         end
         
         function clearFigure(obj)
@@ -73,10 +77,26 @@ classdef GraphingPrePoints < Module
             obj.prevVarianceY = 0;
             cla(obj.meanAxes);
             cla(obj.varAxes);
+            obj.linePlot = false; 
+            obj.previousPersistorPath = obj.symphonyUI.persistPath;
+        end
+        
+        function tf = isNewCell(obj)
+            tf = ~ isempty(obj.previousPersistorPath) && ~ strcmp(obj.previousPersistorPath, obj.symphonyUI.persistPath);
+          
+            if isempty(obj.previousPersistorPath) && ~ isempty(obj.symphonyUI.persistPath)
+                obj.previousPersistorPath = obj.symphonyUI.persistPath;
+            end
         end
         
         function handleEpoch(obj, epoch)
+ 
+            
             obj.epochNumber = obj.epochNumber + 1;
+            if strcmp(epoch.parameters.ampMode, 'Cell attached')
+                obj.linePlot = false;
+                return;
+            end
             [responseData, ~, ~] = epoch.response(obj.amp);
             
             prePts = round(epoch.parameters.preTime / 1e3 * epoch.parameters.sampleRate);
@@ -90,23 +110,23 @@ classdef GraphingPrePoints < Module
             
             axis(obj.varAxes,'tight');
             hold(obj.varAxes, 'all');
- 
+            
             scatter(obj.meanAxes,obj.epochNumber, prePointMean, obj.pointSize, obj.meanColor, 'fill');
             scatter(obj.varAxes,obj.epochNumber, prePointVariance, obj.pointSize, obj.varianceColor, 'fill');
 
-            if obj.epochNumber > 1
-                plot(obj.meanAxes,[(obj.epochNumber-1) obj.epochNumber],[obj.prevMeanY prePointMean],'Color',obj.meanColor, 'LineWidth',obj.lineWidth,'DisplayName','Prepoint Mean - Line');              
-                plot(obj.varAxes,[(obj.epochNumber-1) obj.epochNumber],[obj.prevVarianceY prePointVariance],'Color',obj.varianceColor, 'LineWidth',obj.lineWidth,'DisplayName','Prepoint Variance - Line');
+            if obj.linePlot
+               plot(obj.meanAxes,[(obj.epochNumber-1) obj.epochNumber],[obj.prevMeanY prePointMean],'Color',obj.meanColor, 'LineWidth',obj.lineWidth,'DisplayName','Prepoint Mean - Line');              
+               plot(obj.varAxes,[(obj.epochNumber-1) obj.epochNumber],[obj.prevVarianceY prePointVariance],'Color',obj.varianceColor, 'LineWidth',obj.lineWidth,'DisplayName','Prepoint Variance - Line');
             end
 
             set(obj.varAxes,'Color',obj.axesBackgroundColor);
             set(obj.meanAxes,'Color','none');
-            
             hold(obj.varAxes, 'off');
             hold(obj.meanAxes, 'off');
-            
+
             obj.prevMeanY = prePointMean;
             obj.prevVarianceY = prePointVariance;
+            obj.linePlot = true;
         end        
     end
     

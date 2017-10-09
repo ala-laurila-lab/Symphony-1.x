@@ -120,7 +120,7 @@ classdef LabProtocol < SymphonyProtocol
             obj.sendToLog('');
             obj.ndfCache = [];
             
-            if ~isempty(obj.GraphingPrePoints) && obj.graphing
+            if ~isempty(obj.GraphingPrePoints) && obj.graphing && obj.GraphingPrePoints.isNewCell()
                 obj.GraphingPrePoints.clearFigure();
             end
             
