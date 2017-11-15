@@ -30,6 +30,7 @@ classdef LEDFactorPulse < LabProtocol
         interpulseInterval = 0
         interepochgrpInterval  = 0
         ampHoldSignal = 0
+        useTrigger = false
         %lightRange = {'pico','nano','micro','raw'}
     end
     
@@ -113,7 +114,7 @@ classdef LEDFactorPulse < LabProtocol
             
             epoch.addParameter('ndfCh1', obj.ndfCh1);
             epoch.addParameter('ndfCh2', obj.ndfCh2);
-            
+            epoch.waitForTrigger = obj.useTrigger;%trigerring
             if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
             end
