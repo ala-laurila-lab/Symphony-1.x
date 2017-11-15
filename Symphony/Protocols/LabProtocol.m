@@ -184,9 +184,20 @@ classdef LabProtocol < SymphonyProtocol
         end
         
         function completeEpoch(obj, epoch)
+            
+            if ~isempty(obj.SymphRigSwitches)
+                if isempty(obj.rigSwitchNames)
+                    obj.rigSwitchNames = obj.rigConfig.getRigSwitcheNames();
+                end
+                
+                for s = 1:numel(obj.rigSwitchNames)
+                    obj.SymphRigSwitches.switchesChanged(epoch.response(obj.rigSwitchNames{s}),s);
+                end
+            end
+            
             completeEpoch@SymphonyProtocol(obj, epoch);
             %epoch.addParameter('numberOfEpochsCompleted', obj.numEpochsCompleted);%DT
-          
+            
             if ~isempty(obj.SolutionController)
                 epoch.addParameter('SolutionController', obj.SolutionControllerStatusString);
             end
@@ -209,6 +220,18 @@ classdef LabProtocol < SymphonyProtocol
                 epoch.addParameter('Temp', temp);
             end
             
+            if ~isempty(obj.amplifierResponses)
+                obj.amplifierResponses.handleEpoch(epoch);
+            end
+            
+            if ~isempty(obj.GraphingPrePoints) && obj.graphing
+                obj.GraphingPrePoints.handleEpoch(epoch);
+            end
+            
+            if ~isempty(obj.GraphingAmplifierResponses) && obj.graphing
+                obj.GraphingAmplifierResponses.handleEpoch(epoch);
+            end
+            
             if obj.loggingIsValid
                 
                 currentEpochTime = sprintf('%u:%u:%u', epoch.startTime.Item2.Hour, ...
@@ -218,10 +241,16 @@ classdef LabProtocol < SymphonyProtocol
                 % update the running epoch number and elapsed epoch time in
                 % seconds relative to start of new experimental file
                 obj.notepad.updateRunningEpochNumber(currentEpochTime);
+                prePointEpochNumber = 0;
+                if ~isempty(obj.GraphingPrePoints)
+                    prePointEpochNumber = obj.GraphingPrePoints.epochNumber;
+                end
                 
-                formatSpec = '%u%s%u%s%u%s%u:%u:%u';
+                formatSpec = '# %u%s%u (#pre-point)%s%u (sec)%s%u (#prot)%s%u:%u:%u';
                 s = sprintf(formatSpec, ...
                     obj.notepad.runningEpochNumber, ...
+                    obj.logTab, ...
+                    prePointEpochNumber,...
                     obj.logTab, ...
                     obj.notepad.relativeEpochTime, ...
                     obj.logTab, ...
@@ -255,28 +284,6 @@ classdef LabProtocol < SymphonyProtocol
                 end
                 
                 obj.sendToLog(s);
-            end
-            
-            if ~isempty(obj.GraphingPrePoints) && obj.graphing
-                obj.GraphingPrePoints.handleEpoch(epoch);
-            end
-            
-            if ~isempty(obj.GraphingAmplifierResponses) && obj.graphing
-                obj.GraphingAmplifierResponses.handleEpoch(epoch);
-            end
-            
-            if ~isempty(obj.SymphRigSwitches)
-                if isempty(obj.rigSwitchNames)
-                    obj.rigSwitchNames = obj.rigConfig.getRigSwitcheNames();
-                end
-                
-                for s = 1:numel(obj.rigSwitchNames)
-                    obj.SymphRigSwitches.switchesChanged(epoch.response(obj.rigSwitchNames{s}),s);
-                end
-            end
-            
-            if ~isempty(obj.amplifierResponses)
-                obj.amplifierResponses.handleEpoch(epoch);
             end
         end
         
@@ -396,7 +403,7 @@ classdef LabProtocol < SymphonyProtocol
         function bool = loggingIsValid(obj)
             bool = false;
             % continueLogging
-            if ~isempty(obj.notepad) && obj.notepad.isLogging && obj.allowSavingEpochs
+            if ~isempty(obj.persistor) && ~isempty(obj.notepad) && obj.notepad.isLogging && obj.allowSavingEpochs
                 bool = true;
             end
         end
