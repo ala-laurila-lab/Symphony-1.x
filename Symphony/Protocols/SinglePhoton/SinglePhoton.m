@@ -17,11 +17,13 @@ classdef SinglePhoton < LabProtocol
         tailTime = 500
         ampHoldSignal = 0
         useTrigger = false
-        sourceType = 'type'
-        photonRate = 1
-        pulseWidth = 2
+        sourceType = 'type' % SPS for Single-Photon Source; PS for Poisson sourse
+        photonRate = 1 % photon rate per flash
+        pulseWidth = 2 
         emergencySignal = 'none'
         numberOfEpochs = 5;
+        action = 1; % 0 for setting the rate; 1 for stimulation
+        
     end
     
     methods
