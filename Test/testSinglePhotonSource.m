@@ -1,5 +1,5 @@
-function testSinglePhotonSource()
-    client = SinglePhotonSourceClient('127.0.0.1', 9898);
-    response = client.sendReceive(struct('number', 1, 'string', 'abcd'))
+function testSinglePhotonSource(var1, var2)
+    client = SinglePhotonSourceClient('128.214.235.108', 5020);
+    response = client.sendReceive(struct('number', var1, 'string', var2,'whatever',1))
 end
 

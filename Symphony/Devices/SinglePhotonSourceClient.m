@@ -16,7 +16,9 @@ classdef SinglePhotonSourceClient < handle
         function response = sendReceive(obj, protocol)
             tic;
             obj.createSocket();
-            obj.send(savejson('', protocol, ''));
+            obj.send(savejson('', protocol, 'Compact', 1));
+            disp('sent');
+           pause(1);
             response = obj.recieve();
             obj.close();
             elapsedTime = toc;
