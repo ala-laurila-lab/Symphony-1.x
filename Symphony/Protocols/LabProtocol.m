@@ -267,7 +267,7 @@ classdef LabProtocol < SymphonyProtocol
                     epoch.addParameter('Optometer', optometer);
                 end
                 
-                if ~isempty(amplitude)
+                if exist('amplitude','var') && ~isempty(amplitude)
                     formatSpec = '%s%sStimAmp:%gmV';
                     s = sprintf(formatSpec, s, obj.logTab, amplitude);
                 end

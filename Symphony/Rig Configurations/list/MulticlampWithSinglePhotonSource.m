@@ -57,7 +57,7 @@ classdef MulticlampWithSinglePhotonSource < LabRigConfiguration
             end
             
             % create TCP client object for singlePhoton source
-            obj.singlePhotonSourceClient = SinglePhotonSourceClient('128.214.235.108', '5020');
+            obj.singlePhotonSourceClient = SinglePhotonSourceClient('128.214.235.108', 5020);
         end 
     end
 end

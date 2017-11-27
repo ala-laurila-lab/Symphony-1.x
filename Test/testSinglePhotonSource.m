@@ -1,6 +1,6 @@
 function testSinglePhotonSource()
-    % client = SinglePhotonSourceClient('128.214.235.108', 5020);
-    client = SinglePhotonSourceClient('127.0.0.1', 9898);
+    client = SinglePhotonSourceClient('128.214.235.108', 5020);
+    % client = SinglePhotonSourceClient('127.0.0.1', 9898);
     a = struct();
     a.preTime = 100;
     a.stimTime = 100;

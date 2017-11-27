@@ -24,6 +24,16 @@ classdef SinglePhoton < LabProtocol
     properties (Hidden)
         sessionId
         controlShutter = true       % Control opening of shutter from symphony.
+        cachedPhotonRate = -1       % set to invalid photon rate
+        preRunPropertiesToLog = { ...
+            'photonRate' ...
+            'preTime' ...
+            'stimTime' ...
+            'tailTime' ...
+            'ampHoldSignal' ...
+            'sourceType' ...
+            };
+        postEpochLogging = {'cachedPhotonRate'}
     end
 
     methods
@@ -43,9 +53,9 @@ classdef SinglePhoton < LabProtocol
                 case {'ampHoldSignal'}
                     p.units = obj.rigConfig.getAmpUnits(obj.amp);
                 case {'sourceType'}
-                    p.defaultValue = {'SPS', 'PS'}  % SPS for Single-Photon Source; PS for Poisson sourse
+                    p.defaultValue = {'SPS', 'PS'};  % SPS for Single-Photon Source; PS for Poisson sourse
                 case {'photonRate'}
-                    p.units = 'rate/flash'
+                    p.units = 'rate/flash';
             end
             
             if ~ p.units
@@ -59,17 +69,17 @@ classdef SinglePhoton < LabProtocol
         end
         
         function prepareRun(obj)
-            obj.sessionId = matlab.lang.makeValidName(datestr(datetime));
+            obj.sessionId = char(java.util.UUID.randomUUID);
+            
+            if obj.hasSinglePhotonSource()
+               [~, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_SET_PARAMETERS_ACTION);
+               obj.sendToLog(['REQUEST_SET_PARAMETERS_ACTION [' obj.sessionId '] ' responseJson]);
+            end
             prepareRun@LabProtocol(obj);
         end
         
         function prepareEpoch(obj, epoch)
             
-            if obj.hasSinglePhotonSource()
-                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_STIMULATION_ACTION);
-                epoch.addParameter('REQUEST_STIMULATION_ACTION', responseJson);
-            end
-
             amplifierMode = obj.rigConfig.multiClampMode(obj.amp);
             epoch.addParameter('amplifierMode', amplifierMode);
             
@@ -119,11 +129,12 @@ classdef SinglePhoton < LabProtocol
         
         function completeEpoch(obj, epoch)
             
-            if obj.hasSinglePhotonSource()
-                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_PHOTON_RATE_ACTION);
-                epoch.addParameter('REQUEST_PHOTON_RATE_ACTION', responseJson);
-                epoch.addParameter('observedPhotonRate', response.observedPhotonRate);
+            if obj.hasSinglePhotonSource() %% && mod(obj.numEpochsCompleted, 3) == 0 
+                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_GET_PHOTON_RATE_ACTION);
+                epoch.addParameter('REQUEST_GET_PHOTON_RATE_ACTION', responseJson);
+                obj.cachedPhotonRate = response.photonRate;
             end
+            epoch.addParameter('observedPhotonRate', obj.cachedPhotonRate);
             epoch.addParameter('sessionId', obj.sessionId);
             completeEpoch@LabProtocol(obj, epoch);
         end
@@ -140,7 +151,7 @@ classdef SinglePhoton < LabProtocol
         end
         
         function str = tostr(obj)
-            str = 'TODO '; %
+            str = ['#' num2str(obj.numEpochsCompleted) ' observed photon rate ' num2str(obj.cachedPhotonRate) ]; %
         end
         
         function  tf = isequal(obj, other)

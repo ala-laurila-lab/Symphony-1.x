@@ -7,9 +7,9 @@ classdef SinglePhotonSourceClient < handle
     end
     
     properties (Constant)
-        REQUEST_PHOTON_RATE_ACTION = 0
-        REQUEST_STIMULATION_ACTION = 1
-        MAX_SIZE_IN_BYTES = 500;
+        REQUEST_GET_PHOTON_RATE_ACTION = 0
+        REQUEST_SET_PARAMETERS_ACTION = 1
+        MAX_SIZE_IN_BYTES = 125;
         DEBUG = true;
     end
 
@@ -22,16 +22,15 @@ classdef SinglePhotonSourceClient < handle
         
         function [response, responseJson] = sendReceive(obj, protocol, action)
             tic;
+            
             obj.createSocket();
             requestJson = obj.createRequest(protocol, action);
             obj.send(requestJson);
-            
-            pause(0.5); 
             [response, responseJson] = obj.recieve();
-
             obj.close();
+            
             elapsedTime = toc;
-            if obj.DEBUG disp(['elapsed time for request and response - ' num2str(elapsedTime)]); end;
+            if obj.DEBUG, disp(['elapsed time for request and response - ' num2str(elapsedTime)]); end;
 
             if ~ strcmpi(response.status, 'success')
                 error(response.message);
@@ -51,28 +50,29 @@ classdef SinglePhotonSourceClient < handle
         function requestJson = createRequest(obj, protocol, action)
             request = struct();
             
-            if action == obj.REQUEST_PHOTON_RATE_ACTION
+            if action == obj.REQUEST_SET_PARAMETERS_ACTION
                 request.preTime = protocol.preTime;
                 request.stimTime = protocol.stimTime;
                 request.tailTime = protocol.tailTime;
                 request.sourceType = protocol.sourceType;
                 request.photonRate = protocol.photonRate;
+                request.action = action;
             end
             
-            if action == obj.REQUEST_STIMULATION_ACTION
+            if action == obj.REQUEST_GET_PHOTON_RATE_ACTION
                 request.action = action;
             end
             
             requestJson = savejson('', request, 'Compact', true);
             metaInfo = whos('requestJson');
-            if obj.DEBUG disp(['Request size in bytes = ' num2str(metaInfo.bytes)]); end
+            if obj.DEBUG, disp(['Request size in bytes = ' num2str(metaInfo.bytes)]); end
             
-            elapsedBytes = obj.MAX_SIZE_IN_BYTES - metaInfo.bytes;
+            elapsedBytes = 2 * obj.MAX_SIZE_IN_BYTES - metaInfo.bytes;
             padding = repmat(' ', 1, elapsedBytes / 2);
             requestJson = [requestJson padding];
 
             metaInfo = whos('requestJson');
-            if obj.DEBUG disp([ 'Request size in bytes after padding = '  num2str(metaInfo.bytes) ' bytes; Json : ' requestJson]); end
+            if obj.DEBUG, disp([ 'Request size in bytes after padding = '  num2str(metaInfo.bytes) ' bytes; Json : ' requestJson]); end
         end
 
         function send(obj, request)
@@ -86,7 +86,7 @@ classdef SinglePhotonSourceClient < handle
             line = bufferedReader.readLine();
             responseJson = char(line);
             
-            if obj.DEBUG disp(['response json: ' responseJson]); end
+            if obj.DEBUG, disp(['response json: ' responseJson]); end
             response = loadjson(responseJson);
         end
         
