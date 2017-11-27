@@ -10,7 +10,7 @@ classdef SinglePhotonSourceClient < handle
         REQUEST_GET_PHOTON_RATE_ACTION = 0
         REQUEST_SET_PARAMETERS_ACTION = 1
         MAX_SIZE_IN_BYTES = 125;
-        DEBUG = true;
+        DEBUG = false;
     end
 
     methods

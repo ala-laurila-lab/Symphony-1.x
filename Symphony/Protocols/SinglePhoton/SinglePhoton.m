@@ -55,7 +55,7 @@ classdef SinglePhoton < LabProtocol
                 case {'sourceType'}
                     p.defaultValue = {'SPS', 'PS'};  % SPS for Single-Photon Source; PS for Poisson sourse
                 case {'photonRate'}
-                    p.units = 'rate/flash';
+                    p.units = 'photons/flash';
             end
             
             if ~ p.units
@@ -132,7 +132,7 @@ classdef SinglePhoton < LabProtocol
             if obj.hasSinglePhotonSource() %% && mod(obj.numEpochsCompleted, 3) == 0 
                 [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_GET_PHOTON_RATE_ACTION);
                 epoch.addParameter('REQUEST_GET_PHOTON_RATE_ACTION', responseJson);
-                obj.cachedPhotonRate = response.photonRate;
+                obj.cachedPhotonRate = response.observedPhotonRate;
             end
             epoch.addParameter('observedPhotonRate', obj.cachedPhotonRate);
             epoch.addParameter('sessionId', obj.sessionId);
