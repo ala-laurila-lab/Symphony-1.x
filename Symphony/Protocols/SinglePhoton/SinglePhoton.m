@@ -13,18 +13,17 @@ classdef SinglePhoton < LabProtocol
     properties
         amp
         ampHoldSignal = 0
-        preTime = 500               
-        stimTime = 500
-        tailTime = 500
+        preTime = 500               % (ms)             
+        stimTime = 500              % (ms)
+        tailTime = 500              % (ms)
         numberOfEpochs = 5;
         sourceType                  % SPS for Single-Photon Source; PS for Poisson source
-        controlShutter = false      % Control opening of shutter
         photonRate = 1              % photon rate per flash
-        pulseWidth = 2 
     end
 
     properties (Hidden)
         sessionId
+        controlShutter = true       % Control opening of shutter from symphony.
     end
 
     methods
@@ -78,7 +77,7 @@ classdef SinglePhoton < LabProtocol
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
             end
             
-            if ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger'))
+            if ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger')) && obj.controlShutter
                 epoch.addStimulus('Shutter_Trigger', obj.shutterStimulus());
             end
             
@@ -145,16 +144,14 @@ classdef SinglePhoton < LabProtocol
         end
         
         function  tf = isequal(obj, other)
-            tf= isequal(class(obj), class(other)) && ...
+            tf = isequal(class(obj), class(other)) && ...
                 isequal(obj.preTime, other.preTime) && ...
                 isequal(obj.stimTime, other.stimTime) && ...
                 isequal(obj.tailTime, other.tailTime) && ...
                 isequal(obj.ampMode, other.ampMode) && ...
                 isequal(obj.ampHoldSignal, other.ampHoldSignal) && ...
-                isequal(obj.controlShutter, other.controlShutter) && ...
                 isequal(obj.sourceType, other.sourceType) && ...
-                isequal(obj.photonRate, other.photonRate) && ...
-                isequal(obj.pulseWidth, other.pulseWidth);
+                isequal(obj.photonRate, other.photonRate);
         end
 
         function tf = hasSinglePhotonSource(obj)

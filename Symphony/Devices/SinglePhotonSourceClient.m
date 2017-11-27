@@ -32,6 +32,10 @@ classdef SinglePhotonSourceClient < handle
             obj.close();
             elapsedTime = toc;
             if obj.DEBUG disp(['elapsed time for request and response - ' num2str(elapsedTime)]); end;
+
+            if ~ strcmpi(response.status, 'success')
+                error(response.message);
+            end
         end
         
         function close(obj)
