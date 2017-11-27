@@ -5,27 +5,28 @@ classdef SinglePhoton < LabProtocol
     
     
     properties (Constant)
-        identifier = 'petri.symphony-das.MultiPhoton'
-        version = 1
+        identifier = 'petri.symphony-das.SinglePhoton'
         displayName = 'Single Photon'
+        version = 1
     end
     
     properties
         amp
-        preTime = 500
+        ampHoldSignal = 0
+        preTime = 500               
         stimTime = 500
         tailTime = 500
-        ampHoldSignal = 0
-        useTrigger = false
-        sourceType = 'type' % SPS for Single-Photon Source; PS for Poisson sourse
-        photonRate = 1 % photon rate per flash
-        pulseWidth = 2 
-        emergencySignal = 'none'
         numberOfEpochs = 5;
-        action = 1; % 0 for setting the rate; 1 for stimulation
-        
+        sourceType                  % SPS for Single-Photon Source; PS for Poisson source
+        controlShutter = false      % Control opening of shutter
+        photonRate = 1              % photon rate per flash
+        pulseWidth = 2 
     end
-    
+
+    properties (Hidden)
+        sessionId
+    end
+
     methods
         
         function p = parameterProperty(obj, parameterName)
@@ -42,6 +43,10 @@ classdef SinglePhoton < LabProtocol
                     p.units = 'ms';
                 case {'ampHoldSignal'}
                     p.units = obj.rigConfig.getAmpUnits(obj.amp);
+                case {'sourceType'}
+                    p.defaultValue = {'SPS', 'PS'}  % SPS for Single-Photon Source; PS for Poisson sourse
+                case {'photonRate'}
+                    p.units = 'rate/flash'
             end
             
             if ~ p.units
@@ -54,18 +59,27 @@ classdef SinglePhoton < LabProtocol
             obj.applyAmpHoldSignal();
         end
         
+        function prepareRun(obj)
+            obj.sessionId = matlab.lang.makeValidName(datestr(datetime));
+            prepareRun@LabProtocol(obj);
+        end
+        
         function prepareEpoch(obj, epoch)
             
-            response = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj);
+            if obj.hasSinglePhotonSource()
+                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_STIMULATION_ACTION);
+                epoch.addParameter('REQUEST_STIMULATION_ACTION', responseJson);
+            end
 
-            epoch.waitForTrigger = obj.useTrigger;
             amplifierMode = obj.rigConfig.multiClampMode(obj.amp);
             epoch.addParameter('amplifierMode', amplifierMode);
-            epoch.addParameter('ndfCh1', obj.ndfCh1);
-            epoch.addParameter('ndfCh2', obj.ndfCh2);
             
-            if ~isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
+            if ~ isempty(obj.rigConfig.deviceWithName('Oscilloscope_Trigger'))
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
+            end
+            
+            if ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger'))
+                epoch.addStimulus('Shutter_Trigger', obj.shutterStimulus());
             end
             
             % Call the base method.
@@ -87,7 +101,34 @@ classdef SinglePhoton < LabProtocol
             % Generate the stimulus object.
             stim = p.generate();
         end
+
+        function stim = shutterStimulus(obj)
+            % Construct a repeating pulse stimulus generator.
+            p = PulseGenerator();
+            
+            p.preTime = obj.preTime;
+            p.stimTime = obj.stimTime;
+            p.tailTime = obj.tailTime;
+            p.amplitude = 1;
+            p.mean = 0;
+            p.sampleRate = obj.sampleRate;
+            p.units = Symphony.Core.Measurement.UNITLESS;
+            
+            % Generate the stimulus object.
+            stim = p.generate();
+        end
         
+        function completeEpoch(obj, epoch)
+            
+            if obj.hasSinglePhotonSource()
+                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_PHOTON_RATE_ACTION);
+                epoch.addParameter('REQUEST_PHOTON_RATE_ACTION', responseJson);
+                epoch.addParameter('observedPhotonRate', response.observedPhotonRate);
+            end
+            epoch.addParameter('sessionId', obj.sessionId);
+            completeEpoch@LabProtocol(obj, epoch);
+        end
+
         function keepGoing = continueRun(obj)
             % Check the base class method to make sure the user hasn't paused or stopped the protocol.
             keepGoing = continueRun@SymphonyProtocol(obj);
@@ -110,13 +151,16 @@ classdef SinglePhoton < LabProtocol
                 isequal(obj.tailTime, other.tailTime) && ...
                 isequal(obj.ampMode, other.ampMode) && ...
                 isequal(obj.ampHoldSignal, other.ampHoldSignal) && ...
-                isequal(obj.useTrigger, other.useTrigger) && ...
+                isequal(obj.controlShutter, other.controlShutter) && ...
                 isequal(obj.sourceType, other.sourceType) && ...
                 isequal(obj.photonRate, other.photonRate) && ...
-                isequal(obj.pulseWidth, other.pulseWidth) && ...
-                isequal(obj.emergencySignal, other.emergencySignal);
+                isequal(obj.pulseWidth, other.pulseWidth);
         end
+
+        function tf = hasSinglePhotonSource(obj)
+            tf = isprop(obj.rigConfig, 'singlePhotonSourceClient');
+        end    
     end
-    
+        
 end
 

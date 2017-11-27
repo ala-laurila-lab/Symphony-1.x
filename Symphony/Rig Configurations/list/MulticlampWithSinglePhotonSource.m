@@ -46,8 +46,10 @@ classdef MulticlampWithSinglePhotonSource < LabRigConfiguration
             
             %% Adding the TTL Trigger
             obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.0', '');
+            % Adding the Shutter Trigger
+            obj.addDevice('Shutter_Trigger', 'DIGITAL_OUT.1', '');
+                        
             % Adding filter wheel configuration
-
             wheelconfigs = FilterWheelConfig.listByRigName(obj.RIG_NAME);
             for i = 1:numel(wheelconfigs)
                 config = wheelconfigs(i);

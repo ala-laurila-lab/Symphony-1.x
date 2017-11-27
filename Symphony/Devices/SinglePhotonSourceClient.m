@@ -6,6 +6,13 @@ classdef SinglePhotonSourceClient < handle
         port
     end
     
+    properties (Constant)
+        REQUEST_PHOTON_RATE_ACTION = 0
+        REQUEST_STIMULATION_ACTION = 1
+        MAX_SIZE_IN_BYTES = 500;
+        DEBUG = true;
+    end
+
     methods
         
         function obj = SinglePhotonSourceClient(ip, port)
@@ -13,16 +20,18 @@ classdef SinglePhotonSourceClient < handle
             obj.port = port;
         end
         
-        function response = sendReceive(obj, protocol)
+        function [response, responseJson] = sendReceive(obj, protocol, action)
             tic;
             obj.createSocket();
-            obj.send(savejson('', protocol, 'Compact', 1));
-            disp('sent');
-           pause(1);
-            response = obj.recieve();
+            requestJson = obj.createRequest(protocol, action);
+            obj.send(requestJson);
+            
+            pause(0.5); 
+            [response, responseJson] = obj.recieve();
+
             obj.close();
             elapsedTime = toc;
-            disp(['elapsed time - ' num2str(elapsedTime)]);
+            if obj.DEBUG disp(['elapsed time for request and response - ' num2str(elapsedTime)]); end;
         end
         
         function close(obj)
@@ -35,16 +44,46 @@ classdef SinglePhotonSourceClient < handle
     
     methods (Access = private)
         
+        function requestJson = createRequest(obj, protocol, action)
+            request = struct();
+            
+            if action == obj.REQUEST_PHOTON_RATE_ACTION
+                request.preTime = protocol.preTime;
+                request.stimTime = protocol.stimTime;
+                request.tailTime = protocol.tailTime;
+                request.sourceType = protocol.sourceType;
+                request.photonRate = protocol.photonRate;
+            end
+            
+            if action == obj.REQUEST_STIMULATION_ACTION
+                request.action = action;
+            end
+            
+            requestJson = savejson('', request, 'Compact', true);
+            metaInfo = whos('requestJson');
+            if obj.DEBUG disp(['Request size in bytes = ' num2str(metaInfo.bytes)]); end
+            
+            elapsedBytes = obj.MAX_SIZE_IN_BYTES - metaInfo.bytes;
+            padding = repmat(' ', 1, elapsedBytes / 2);
+            requestJson = [requestJson padding];
+
+            metaInfo = whos('requestJson');
+            if obj.DEBUG disp([ 'Request size in bytes after padding = '  num2str(metaInfo.bytes) ' bytes; Json : ' requestJson]); end
+        end
+
         function send(obj, request)
             requestJson = java.lang.String(request);
             dataOutPutStream = java.io.DataOutputStream(obj.clientSocket.getOutputStream());
             dataOutPutStream.writeBytes(requestJson); % UTF String json
         end
         
-        function response = recieve(obj)
+        function [response, responseJson] = recieve(obj)
             bufferedReader = java.io.BufferedReader(java.io.InputStreamReader(obj.clientSocket.getInputStream()));
             line = bufferedReader.readLine();
-            response = char(line);
+            responseJson = char(line);
+            
+            if obj.DEBUG disp(['response json: ' responseJson]); end
+            response = loadjson(responseJson);
         end
         
         function createSocket(obj)
