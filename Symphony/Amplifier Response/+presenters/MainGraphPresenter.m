@@ -45,6 +45,7 @@ classdef MainGraphPresenter < Presenter
         end
         
         function updateOtherPlots(obj)
+            v = obj.view;
             idx = v.getSelectedChannelIdx();
             tf = ~ isempty(idx);
             v.viewAverageResponseCheckBox(tf);
