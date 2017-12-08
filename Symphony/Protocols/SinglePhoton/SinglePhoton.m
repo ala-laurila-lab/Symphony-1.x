@@ -19,6 +19,10 @@ classdef SinglePhoton < LabProtocol
         numberOfEpochs = 5;
         sourceType                  % SPS for Single-Photon Source; PS for Poisson source
         photonRate = 1              % photon rate per flash
+        shutterTrigger              % Determines which digital port will be active for shutter TTL 
+        stimX = 0                   % X co-ordinate of beam stimulation 
+        stimY = 0                   % Y co-ordinate of beam stimulation
+        stimZ = 0                   % Z co-ordinate of beam stimulation
     end
 
     properties (Hidden)
@@ -56,6 +60,8 @@ classdef SinglePhoton < LabProtocol
                     p.defaultValue = {'SPS', 'PS'};  % SPS for Single-Photon Source; PS for Poisson sourse
                 case {'photonRate'}
                     p.units = 'photons/flash';
+                case {'shutterTrigger'}
+                    p.defaultValue = {'port1', 'port2'};
             end
             
             if ~ p.units
@@ -87,8 +93,12 @@ classdef SinglePhoton < LabProtocol
                 epoch.addStimulus('Oscilloscope_Trigger', obj.ttlStimulus());
             end
             
-            if ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger')) && obj.controlShutter
-                epoch.addStimulus('Shutter_Trigger', obj.shutterStimulus());
+            if obj.hasValidShutter()
+                if strcmp(obj.shutterTrigger, 'port1')
+                    epoch.addStimulus('Shutter_Trigger', obj.shutterStimulus());
+                else 
+                    epoch.addStimulus('Shutter_Trigger_Secondary', obj.shutterStimulus());
+                end
             end
             
             % Call the base method.
@@ -168,6 +178,10 @@ classdef SinglePhoton < LabProtocol
         function tf = hasSinglePhotonSource(obj)
             tf = isprop(obj.rigConfig, 'singlePhotonSourceClient');
         end    
+
+        function tf = hasValidShutter(obj)
+            tf = obj.controlShutter && ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger')) && ~ isempty(obj.rigConfig.deviceWithName('Shutter_Trigger_Secondary'));
+        end
     end
         
 end

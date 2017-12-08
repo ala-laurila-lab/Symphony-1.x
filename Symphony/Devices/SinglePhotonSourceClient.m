@@ -4,13 +4,17 @@ classdef SinglePhotonSourceClient < handle
         clientSocket
         ip
         port
+        retryCount
     end
     
     properties (Constant)
         REQUEST_GET_PHOTON_RATE_ACTION = 0
         REQUEST_SET_PARAMETERS_ACTION = 1
+        REQUEST_SET_PARAMETERS_STATUS_ACTION = 2
         MAX_SIZE_IN_BYTES = 125;
         DEBUG = false;
+        POLL_INTERVAL_IN_SEC = 1   
+        MAX_RETRY_COUNT = 10
     end
 
     methods
@@ -32,8 +36,15 @@ classdef SinglePhotonSourceClient < handle
             elapsedTime = toc;
             if obj.DEBUG, disp(['elapsed time for request and response - ' num2str(elapsedTime)]); end;
 
-            if ~ strcmpi(response.status, 'success')
-                error(response.message);
+            switch lower(response.status)
+                case 'accepted'
+                    obj.startPolling(protocol, obj.REQUEST_SET_PARAMETERS_STATUS_ACTION);
+                case 'notready'
+                    obj.continuePolling(protocol, obj.REQUEST_SET_PARAMETERS_STATUS_ACTION);
+                case 'success'
+                    return   
+                otherwise
+                    error(response.message);
             end
         end
         
@@ -47,22 +58,37 @@ classdef SinglePhotonSourceClient < handle
     
     methods (Access = private)
         
+        function startPolling(obj, protocol, action)
+            obj.retryCount = 1;
+            pause(obj.POLL_INTERVAL_IN_SEC);
+            obj.sendReceive(protocol, action);
+            if obj.DEBUG, disp('started polling'); end;
+        end
+
+        function continuePolling(obj, protocol, action)
+            if obj.retryCount > obj.MAX_RETRY_COUNT
+                error('Retry attempt exceded');
+            end
+            obj.retryCount = obj.retryCount + 1;
+            pause(obj.POLL_INTERVAL_IN_SEC);
+            obj.sendReceive(protocol, action);
+            if obj.DEBUG, disp(['continue polling #' num2str(obj.retryCount)]); end;
+        end
+
+
         function requestJson = createRequest(obj, protocol, action)
             request = struct();
             
-            if action == obj.REQUEST_SET_PARAMETERS_ACTION
-                request.preTime = protocol.preTime;
-                request.stimTime = protocol.stimTime;
-                request.tailTime = protocol.tailTime;
-                request.sourceType = protocol.sourceType;
-                request.photonRate = protocol.photonRate;
-                request.action = action;
+            switch action 
+                case obj.REQUEST_SET_PARAMETERS_ACTION
+                    request.preTime = protocol.preTime;
+                    request.stimTime = protocol.stimTime;
+                    request.tailTime = protocol.tailTime;
+                    request.sourceType = protocol.sourceType;
+                    request.photonRate = protocol.photonRate;
             end
-            
-            if action == obj.REQUEST_GET_PHOTON_RATE_ACTION
-                request.action = action;
-            end
-            
+
+            request.action = action;            
             requestJson = savejson('', request, 'Compact', true);
             metaInfo = whos('requestJson');
             if obj.DEBUG, disp(['Request size in bytes = ' num2str(metaInfo.bytes)]); end
