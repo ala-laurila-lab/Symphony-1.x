@@ -26,6 +26,7 @@ classdef MainGraphPresenter < Presenter
         
         function onGo(obj)
             obj.updateSelectedChannels();
+            obj.updateOtherPlots();
             obj.startSpikeDetection();
         end 
     end
@@ -41,7 +42,10 @@ classdef MainGraphPresenter < Presenter
             v = obj.view;
             idx = v.getSelectedChannelIdx();
             obj.graphingService.updateChannels(idx);
-            
+        end
+        
+        function updateOtherPlots(obj)
+            idx = v.getSelectedChannelIdx();
             tf = ~ isempty(idx);
             v.viewAverageResponseCheckBox(tf);
             v.viewPSTHResponseCheckBox(tf);
@@ -74,6 +78,8 @@ classdef MainGraphPresenter < Presenter
                 s.reset(epoch);
                 obj.closeAverageResponsePresenter();
                 obj.closePSTHResponsePresenter();
+                obj.updateSelectedChannels();
+                obj.startSpikeDetection();
             end
             
             v = obj.view;

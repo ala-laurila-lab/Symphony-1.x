@@ -16,6 +16,12 @@ classdef GraphingService < handle
     
     methods
         
+        function obj = GraphingService(channels, responseStatisticsClass)            
+            obj.serviceContext = struct();
+            obj.channels = channels;
+            obj.initServiceContext(responseStatisticsClass);
+        end
+        
         % Initilize service context object
         % Service context is the dynamic structure for amplifier channels
         % {'amp1', 'amp2'.. etc}
@@ -28,17 +34,17 @@ classdef GraphingService < handle
         % 2. serviceContext.channels{'amp1'}.statistics; contains
         % service.ResponseStatistics of amp1
         
-        function obj = GraphingService(channels)
+        function initServiceContext(obj, responseStatisticsClass)
             import constants.*;
             
-            obj.serviceContext = struct();
-            obj.channels = channels;
-            for i = 1:length(channels)
-                ch = channels{i};
+            for i = 1:length(obj.channels)
+                ch = obj.channels{i};
                 obj.serviceContext.(ch).props = GraphingConstants.getMainGraphProperties(i);
-                obj.serviceContext.(ch).statistics = service.ResponseStatistics(ch);
+                constructor = str2func(responseStatisticsClass);
+                obj.serviceContext.(ch).statistics = constructor(ch);
             end
         end
+            
         
         function [x, y, props] = getCurrentEpoch(obj, channel, epoch)
             [y, s] = obj.getBaselinedResponse(channel, epoch);
@@ -129,7 +135,7 @@ classdef GraphingService < handle
         end
         
         function tf = hasProtocolChanged(obj)
-            tf = obj.numEpochsCompleted == 1 || (~ isempty(obj.cachedProtocol) && obj.cachedProtocol == obj.protocol);
+            tf = obj.protocol.numEpochsCompleted == 1;
         end
         
         function reset(obj, epoch)

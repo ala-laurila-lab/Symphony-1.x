@@ -6,7 +6,7 @@ classdef ResponseStatistics < handle
         enabled                 % spike detection status from GUI
     end
     
-    properties(SetAccess = private)
+    properties(SetAccess = protected)
         indices                 % containers.Map with 'key' as epoch id and 'value' as detected spike indices
         avgResponse             % cell array of struct for storing obj.avgOfRepeats 
     end
@@ -106,6 +106,7 @@ classdef ResponseStatistics < handle
         
         function trail = getSpikeIndices(obj, id)
             columns = obj.getGroupIndices(id);
+            spikes = [];
             n = 0;
             for i = 1:length(columns)
                 if isKey(obj.indices, columns(i))

@@ -1,4 +1,4 @@
-classdef LEDFactorPulseResponseStatistics < ResponseStatistics
+classdef LEDFactorPulseResponseStatistics < service.ResponseStatistics
     
     
     properties(Access = private)
@@ -9,8 +9,12 @@ classdef LEDFactorPulseResponseStatistics < ResponseStatistics
     
     methods
         
+        function obj = LEDFactorPulseResponseStatistics(amplifier)
+            obj = obj@service.ResponseStatistics(amplifier);
+        end
+        
         function init(obj, epoch)
-            init@ResponseStatistics(obj, epoch);
+            init@service.ResponseStatistics(obj, epoch);
             p = epoch.parameters;
             obj.initialPulseAmplitude = p.initialPulseAmplitude;
             obj.numberOfIntensities = p.numberOfIntensities;
