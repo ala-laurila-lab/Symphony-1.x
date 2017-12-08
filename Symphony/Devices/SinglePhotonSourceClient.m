@@ -13,7 +13,7 @@ classdef SinglePhotonSourceClient < handle
         REQUEST_SET_PARAMETERS_STATUS_ACTION = 2
         MAX_SIZE_IN_BYTES = 125;
         DEBUG = false;
-        POLL_INTERVAL_IN_SEC = 1   
+        POLL_INTERVAL_IN_SEC = 2   
         MAX_RETRY_COUNT = 10
     end
 
@@ -61,8 +61,8 @@ classdef SinglePhotonSourceClient < handle
         function startPolling(obj, protocol, action)
             obj.retryCount = 1;
             pause(obj.POLL_INTERVAL_IN_SEC);
-            obj.sendReceive(protocol, action);
             if obj.DEBUG, disp('started polling'); end;
+            obj.sendReceive(protocol, action);
         end
 
         function continuePolling(obj, protocol, action)
@@ -70,9 +70,9 @@ classdef SinglePhotonSourceClient < handle
                 error('Retry attempt exceded');
             end
             obj.retryCount = obj.retryCount + 1;
+            disp(['continue polling #' num2str(obj.retryCount) ' in 2 sec']);
             pause(obj.POLL_INTERVAL_IN_SEC);
             obj.sendReceive(protocol, action);
-            if obj.DEBUG, disp(['continue polling #' num2str(obj.retryCount)]); end;
         end
 
 
