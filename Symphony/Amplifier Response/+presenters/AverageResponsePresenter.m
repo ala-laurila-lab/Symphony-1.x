@@ -11,8 +11,8 @@ classdef AverageResponsePresenter < Presenter
             v = obj.view;
             chs = obj.averageService.keys;
             s = obj.averageService(chs{1});
-            voltages = s.intensitiesToVoltages();
-            v.setControlsLayout(voltages, chs);
+            groupBy = s.getGroupByLabel();
+            v.setControlsLayout(groupBy, chs);
             obj.channels = chs;
         end
         

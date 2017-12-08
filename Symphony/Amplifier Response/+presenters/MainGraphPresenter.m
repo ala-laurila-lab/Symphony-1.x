@@ -69,9 +69,9 @@ classdef MainGraphPresenter < Presenter
         
         function plotGraph(obj, epoch)
             s = obj.graphingService;
+
             if s.hasProtocolChanged()
                 s.reset(epoch);
-                %TODO alert user for change of protocol
                 obj.closeAverageResponsePresenter();
                 obj.closePSTHResponsePresenter();
             end
@@ -90,8 +90,6 @@ classdef MainGraphPresenter < Presenter
             end
             v.resetGraph();
             v.renderGraph();
-            s.epochId = s.epochId + 1;
-            
             obj.showAverageResponse();
             obj.showPSTHResponse();
             

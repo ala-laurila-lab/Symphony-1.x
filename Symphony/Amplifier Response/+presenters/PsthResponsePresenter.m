@@ -10,7 +10,7 @@ classdef PsthResponsePresenter < Presenter
             v = obj.view;
             channels = obj.spikeServices.keys;
             s = obj.spikeServices(channels{1});
-            voltages = s.intensitiesToVoltages();
+            voltages = s.getGroupByLabel();
             v.setControlsLayout(voltages, channels);
         end
         
