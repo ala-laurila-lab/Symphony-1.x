@@ -47,6 +47,10 @@ classdef Multiclamp < LabRigConfiguration
             obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.0', '');
             % Adding the Shutter Trigger
             obj.addDevice('Shutter_Trigger', 'DIGITAL_OUT.1', '');
+            % Adding another Shutter Trigger as per Daisuke and Krishna suggestion.
+            % Reason : This channel is for driving a shutter from Uniblit
+            % If you happend to comment below line of code please change the method SinglePhoton@hasValidShutter accordingly
+            obj.addDevice('Shutter_Trigger_Secondary', 'DIGITAL_OUT.2', '');
             % Adding filter wheel configuration
 
             wheelconfigs = FilterWheelConfig.listByRigName(obj.RIG_NAME);
