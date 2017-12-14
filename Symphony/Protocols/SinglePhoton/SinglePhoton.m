@@ -81,8 +81,14 @@ classdef SinglePhoton < LabProtocol
             obj.sessionId = char(java.util.UUID.randomUUID);
             
             if obj.hasSinglePhotonSource()
-               [~, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_SET_PARAMETERS_ACTION);
-               obj.sendToLog(['REQUEST_SET_PARAMETERS_ACTION [' obj.sessionId '] ' responseJson]);
+                try
+                    obj.setState('paused');
+                    [~, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_SET_PARAMETERS_ACTION);
+                    obj.sendToLog(['REQUEST_SET_PARAMETERS_ACTION [' obj.sessionId '] ' responseJson]);
+                catch e
+                    obj.stop();
+                    waitfor(errordlg(['An error occurred while running the protocol.' char(10) char(10) getReport(e, 'extended', 'hyperlinks', 'off')]));
+                end
             end
             prepareRun@LabProtocol(obj);
         end
