@@ -88,6 +88,8 @@ classdef SinglePhoton < LabProtocol
                 catch e
                     obj.stop();
                     waitfor(errordlg(['An error occurred while running the protocol.' char(10) char(10) getReport(e, 'extended', 'hyperlinks', 'off')]));
+                    drawnow;
+                    throw(e);
                 end
             end
             prepareRun@LabProtocol(obj);
