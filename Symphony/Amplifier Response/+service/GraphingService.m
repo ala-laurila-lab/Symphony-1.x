@@ -4,7 +4,6 @@ classdef GraphingService < handle
         channels        % Has all the amplifer channels
         serviceContext  % Dynamic structure for amplifier channel response @see constructuor
         protocol        % Lab protocol
-        epochId         % Different from protocol.numEpochsCompleted
     end
     
     properties(Access = private)
@@ -16,6 +15,12 @@ classdef GraphingService < handle
     end
     
     methods
+        
+        function obj = GraphingService(channels, responseStatisticsClass)            
+            obj.serviceContext = struct();
+            obj.channels = channels;
+            obj.initServiceContext(responseStatisticsClass);
+        end
         
         % Initilize service context object
         % Service context is the dynamic structure for amplifier channels
@@ -29,18 +34,17 @@ classdef GraphingService < handle
         % 2. serviceContext.channels{'amp1'}.statistics; contains
         % service.ResponseStatistics of amp1
         
-        function obj = GraphingService(channels)
+        function initServiceContext(obj, responseStatisticsClass)
             import constants.*;
             
-            obj.serviceContext = struct();
-            obj.channels = channels;
-            obj.epochId = 1;
-            for i = 1:length(channels)
-                ch = channels{i};
+            for i = 1:length(obj.channels)
+                ch = obj.channels{i};
                 obj.serviceContext.(ch).props = GraphingConstants.getMainGraphProperties(i);
-                obj.serviceContext.(ch).statistics = service.ResponseStatistics(ch);
+                constructor = str2func(responseStatisticsClass);
+                obj.serviceContext.(ch).statistics = constructor(ch);
             end
         end
+            
         
         function [x, y, props] = getCurrentEpoch(obj, channel, epoch)
             [y, s] = obj.getBaselinedResponse(channel, epoch);
@@ -58,7 +62,7 @@ classdef GraphingService < handle
             
             if s.enabled
                 [y, ~] = obj.getBaselinedResponse(channel, epoch);
-                [indices, rate] = s.detect(epoch, obj.epochId);
+                [indices, rate] = s.detect(epoch, obj.protocol.numEpochsCompleted);
                 y = y(indices);
                 
                 stimStart = epoch.getParameter('preTime')*1E-3;
@@ -68,7 +72,7 @@ classdef GraphingService < handle
         
         function computeAverage(obj, channel, epoch)
             s = obj.serviceContext.(channel).statistics;
-            s.computeAvgResponseForTrails(epoch, obj.epochId);
+            s.computeAvgResponseForTrails(epoch, obj.protocol.numEpochsCompleted);
         end
         
         
@@ -131,21 +135,16 @@ classdef GraphingService < handle
         end
         
         function tf = hasProtocolChanged(obj)
-            if ~isempty(obj.cachedProtocol)
-                tf = ~ obj.protocol.isequal(obj.cachedProtocol); 
-                return;
-            end
-            tf = true;
+            tf = obj.protocol.numEpochsCompleted == 1;
         end
         
         function reset(obj, epoch)
-            obj.epochId = 1;
             obj.cachedProtocol = copy(obj.protocol);
             cellfun(@(ch) obj.serviceContext.(ch).statistics.init(epoch), obj.channels);
         end
         
         function tf = isStarted(obj)
-            tf = obj.epochId > 1;
+            tf = obj.protocol.numEpochsCompleted > 0;
         end
         
         %TODO move this piece of code in device specific class

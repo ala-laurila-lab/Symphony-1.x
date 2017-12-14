@@ -6,19 +6,16 @@ classdef ResponseStatistics < handle
         enabled                 % spike detection status from GUI
     end
     
-    properties(SetAccess = private)
+    properties(SetAccess = protected)
         indices                 % containers.Map with 'key' as epoch id and 'value' as detected spike indices
         avgResponse             % cell array of struct for storing obj.avgOfRepeats 
     end
     
-    properties(Access = private)
+    properties(Access = protected)
         amplifier
         avgOfRepeats            % average of repeats grouped by stmimuls intensity, Fields: r 'avg response', n 'count'
-        initialPulseAmplitude   % below attribute act as metadata to optimize coding block for epoch parameters
-        numberOfIntensities
         stimulusStart
         sampleRate
-        scalingFactor
         epochLength
         startEpochId
         endEpochId
@@ -39,13 +36,9 @@ classdef ResponseStatistics < handle
             [r, ~, ~] = epoch.response(obj.amplifier);
             obj.indices = containers.Map('KeyType', 'int32', 'ValueType', 'any');
             p = epoch.parameters;
-            obj.initialPulseAmplitude = p.initialPulseAmplitude;
-            obj.numberOfIntensities = p.numberOfIntensities;
-            obj.stimulusStart = p.preTime * 1E-3; % TODO remove Hard coded unit
+            obj.stimulusStart = p.preTime * 1E-3; 
             obj.sampleRate = p.sampleRate;
-            obj.scalingFactor = p.scalingFactor;
             obj.epochLength = length(r);
-            obj.avgResponse = cell(obj.numberOfIntensities, 1);
         end
         
         function [indices, s] = detect(obj, epoch, id)
@@ -62,12 +55,8 @@ classdef ResponseStatistics < handle
         end
         
         function computeAvgResponseForTrails(obj, epoch, id)
-            stimulsIndex = mod(id, obj.numberOfIntensities);
             
-            if stimulsIndex == 0
-                stimulsIndex = obj.numberOfIntensities;
-            end
-            
+            stimulsIndex = obj.getCurrentGroupIndex(id);
             [r, ~, ~] =  epoch.response(obj.amplifier);
             r = r - mean(r(1: obj.stimulusStart * obj.sampleRate));
             
@@ -116,9 +105,8 @@ classdef ResponseStatistics < handle
         end 
         
         function trail = getSpikeIndices(obj, id)
+            columns = obj.getGroupIndices(id);
             spikes = [];
-            columns = (id : obj.numberOfIntensities : obj.endEpochId);
-            columns = columns(columns >= obj.startEpochId);
             n = 0;
             for i = 1:length(columns)
                 if isKey(obj.indices, columns(i))
@@ -130,12 +118,10 @@ classdef ResponseStatistics < handle
             trail.spikes = spikes;
             trail.length = n;
         end
-        
-        function intensities = intensitiesToVoltages(obj)
-            v = obj.initialPulseAmplitude;
-            scale = obj.scalingFactor;
-            exponent = (0 : obj.numberOfIntensities-1);
-            intensities = arrayfun(@(n) round((scale^n)*v), exponent);
-        end
+    end
+
+    methods (Abstract)
+        getCurrentGroupIndex(obj, id)
+        getGroupIndices(obj, id);
     end
 end

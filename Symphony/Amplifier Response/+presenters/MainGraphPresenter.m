@@ -26,6 +26,7 @@ classdef MainGraphPresenter < Presenter
         
         function onGo(obj)
             obj.updateSelectedChannels();
+            obj.updateOtherPlots();
             obj.startSpikeDetection();
         end 
     end
@@ -41,7 +42,11 @@ classdef MainGraphPresenter < Presenter
             v = obj.view;
             idx = v.getSelectedChannelIdx();
             obj.graphingService.updateChannels(idx);
-            
+        end
+        
+        function updateOtherPlots(obj)
+            v = obj.view;
+            idx = v.getSelectedChannelIdx();
             tf = ~ isempty(idx);
             v.viewAverageResponseCheckBox(tf);
             v.viewPSTHResponseCheckBox(tf);
@@ -69,11 +74,13 @@ classdef MainGraphPresenter < Presenter
         
         function plotGraph(obj, epoch)
             s = obj.graphingService;
+
             if s.hasProtocolChanged()
                 s.reset(epoch);
-                %TODO alert user for change of protocol
                 obj.closeAverageResponsePresenter();
                 obj.closePSTHResponsePresenter();
+                obj.updateSelectedChannels();
+                obj.startSpikeDetection();
             end
             
             v = obj.view;
@@ -90,8 +97,6 @@ classdef MainGraphPresenter < Presenter
             end
             v.resetGraph();
             v.renderGraph();
-            s.epochId = s.epochId + 1;
-            
             obj.showAverageResponse();
             obj.showPSTHResponse();
             

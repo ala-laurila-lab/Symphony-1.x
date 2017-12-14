@@ -1,7 +1,7 @@
-classdef Multiclamp < LabRigConfiguration
+classdef MulticlampWithSinglePhotonSource < LabRigConfiguration
     
     properties (Constant)
-        displayName = 'Multiclamp'
+        displayName = 'MulticlampWithSinglePhotonSource'
         numberOfRigSwitches = 4;
         RIG_DESC = 'Viiki Patch Rig'
         RIG_NAME = 'A'
@@ -9,6 +9,7 @@ classdef Multiclamp < LabRigConfiguration
     
     properties(SetAccess = private)
         filterWheels = containers.Map();
+        singlePhotonSourceClient
     end
 
     methods   
@@ -45,19 +46,22 @@ classdef Multiclamp < LabRigConfiguration
             
             %% Adding the TTL Trigger
             obj.addDevice('Oscilloscope_Trigger', 'DIGITAL_OUT.0', '');
-            % Adding the Shutter Trigger
+            % Adding the Shutter Trigger - This channel is for driving a shutter from thorlabs setup
             obj.addDevice('Shutter_Trigger', 'DIGITAL_OUT.1', '');
             % Adding another Shutter Trigger as per Daisuke and Krishna suggestion.
             % Reason : This channel is for driving a shutter from Uniblit
             % If you happend to comment below line of code please change the method SinglePhoton@hasValidShutter accordingly
             obj.addDevice('Shutter_Trigger_Secondary', 'DIGITAL_OUT.2', '');
+                        
             % Adding filter wheel configuration
-
             wheelconfigs = FilterWheelConfig.listByRigName(obj.RIG_NAME);
             for i = 1:numel(wheelconfigs)
                 config = wheelconfigs(i);
                 obj.filterWheels(char(config)) = FilterWheel(config);
             end
+            
+            % create TCP client object for singlePhoton source
+            obj.singlePhotonSourceClient = SinglePhotonSourceClient('128.214.235.108', 5020);
         end 
     end
 end
