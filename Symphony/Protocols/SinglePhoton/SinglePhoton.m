@@ -103,7 +103,14 @@ classdef SinglePhoton < LabProtocol
                     epoch.addStimulus('Shutter_Trigger_Secondary', obj.shutterStimulus());
                 end
             end
-            
+            % Get the observed photon rate 
+            if obj.hasSinglePhotonSource() %% && mod(obj.numEpochsCompleted, 3) == 0 
+                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_GET_PHOTON_RATE_ACTION);
+                epoch.addParameter('REQUEST_GET_PHOTON_RATE_ACTION', responseJson);
+                obj.cachedPhotonRate = response.observedPhotonRate;
+            end
+            epoch.addParameter('observedPhotonRate', obj.cachedPhotonRate);
+            epoch.addParameter('sessionId', obj.sessionId);
             % Call the base method.
             prepareEpoch@SymphonyProtocol(obj, epoch);
         end
@@ -140,18 +147,6 @@ classdef SinglePhoton < LabProtocol
             stim = p.generate();
         end
         
-        function completeEpoch(obj, epoch)
-            
-            if obj.hasSinglePhotonSource() %% && mod(obj.numEpochsCompleted, 3) == 0 
-                [response, responseJson] = obj.rigConfig.singlePhotonSourceClient.sendReceive(obj, SinglePhotonSourceClient.REQUEST_GET_PHOTON_RATE_ACTION);
-                epoch.addParameter('REQUEST_GET_PHOTON_RATE_ACTION', responseJson);
-                obj.cachedPhotonRate = response.observedPhotonRate;
-            end
-            epoch.addParameter('observedPhotonRate', obj.cachedPhotonRate);
-            epoch.addParameter('sessionId', obj.sessionId);
-            completeEpoch@LabProtocol(obj, epoch);
-        end
-
         function keepGoing = continueRun(obj)
             % Check the base class method to make sure the user hasn't paused or stopped the protocol.
             keepGoing = continueRun@SymphonyProtocol(obj);
